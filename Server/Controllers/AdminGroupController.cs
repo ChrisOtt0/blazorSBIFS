@@ -19,7 +19,11 @@ namespace blazorSBIFS.Server.Controllers
         [HttpGet("ReadOne"), Authorize(Roles = "admin")]
         public async Task<ActionResult<Group>> Get(GroupDto requested)
         {
-            var group = await _context.Groups.FirstOrDefaultAsync(g => g.GroupID == requested.GroupID);
+            var group = await _context.Groups
+                .Where(g => g.GroupID == requested.GroupID)
+                .Include(g => g.Participants)
+                .FirstAsync();
+
             if (group == null)
                 return BadRequest("No such group.");
 
@@ -35,7 +39,10 @@ namespace blazorSBIFS.Server.Controllers
             if (login == null)
                 return BadRequest("No such user.");
 
-            var groups = await _context.Groups.Where(g => g.OwnerID == login.UserID).ToListAsync();
+            var groups = await _context.Groups
+                .Where(g => g.OwnerID == login.UserID)
+                .Include (g => g.Participants)
+                .ToListAsync();
             return Ok(groups);
         }
 
@@ -52,12 +59,13 @@ namespace blazorSBIFS.Server.Controllers
             if (user == null)
                 return BadRequest("No such user.");
 
-            Group g = new Group();
-            g.OwnerID = user.UserID;
-            user.Groups.Add(g);
-            g.Participants.Add(user);
+            Group group = new Group();
+            group.OwnerID = user.UserID;
+            group.Name = "New Group";
+            user.Groups.Add(group);
+            group.Participants.Add(user);
 
-            await _context.Groups.AddAsync(g);
+            await _context.Groups.AddAsync(group);
             await _context.SaveChangesAsync();
 
             // Necessity for a group name which is returned instead? 
@@ -69,11 +77,11 @@ namespace blazorSBIFS.Server.Controllers
         [HttpDelete("Delete"), Authorize(Roles = "admin")]
         public async Task<ActionResult> Delete(GroupDto request)
         {
-            Group? g = await _context.Groups.FindAsync(request.GroupID);
-            if (g == null)
+            Group? group = await _context.Groups.FindAsync(request.GroupID);
+            if (group == null)
                 return BadRequest("No such group.");
 
-            _context.Groups.Remove(g);
+            _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
 
             return NoContent();

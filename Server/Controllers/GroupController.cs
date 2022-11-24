@@ -56,6 +56,7 @@ namespace blazorSBIFS.Server.Controllers
                 return BadRequest("No such user.");
 
             Group group = new Group();
+            group.Name = "New Group";
             user.Groups.Add(group);
             group.Participants.Add(user);
             group.OwnerID = userID;
