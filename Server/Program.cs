@@ -2,9 +2,10 @@ global using blazorSBIFS.Server.Data;
 global using blazorSBIFS.Shared.Models;
 global using blazorSBIFS.Server.Services.UserService;
 global using blazorSBIFS.Shared.DataTransferObjects;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.AspNetCore.Authorization;
 using blazorSBIFS.Server.Tools;
 using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -69,11 +70,15 @@ else
 
 app.UseHttpsRedirection();
 
+
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
 
+// Authentication and Authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
