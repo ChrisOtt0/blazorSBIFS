@@ -58,13 +58,13 @@ namespace blazorSBIFS.Server.Controllers
         {
             var login = await _context.UserLogins.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (login == null)
-                return Forbid("Wrong username or password.");
+                return Unauthorized("Wrong username or password.");
 
             string salt = new SaltAdapter().GetSalt();
             string hashedPass = SecurityTools.HashString(request.Password, salt);
 
             if (login.Password != hashedPass)
-                return Forbid("Wrong username or password.");
+                return Unauthorized("Wrong username or password.");
 
             var user = await _context.Users.FindAsync(login.UserID);
             if (user == null)
