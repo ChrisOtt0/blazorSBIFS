@@ -1,0 +1,27 @@
+﻿@page "/groups"
+@inject NavigationManager NavigationManager
+
+<PageTitle>Groups</PageTitle>
+
+<div class="col-12">
+
+	@foreach (Group group in GroupsTest) {
+		<a href="/group/@group.GroupID" class="list-group-item list-group-item-action flex-column align-items-start">
+			@group.Name <span> </span></a>
+	}
+
+</div>
+
+@code {
+	private List<Group> GroupsTest { get; set; } = new List<Group>();
+
+	protected override async Task OnInitializedAsync() {
+		// Get Groups from User
+
+		GroupsTest.Add(new Group { GroupID = 0, Name = "test1" });
+		GroupsTest.Add(new Group { GroupID = 1, Name = "test2" });
+		GroupsTest.Add(new Group { GroupID = 2, Name = "test3" });
+		GroupsTest.Add(new Group { GroupID = 3, Name = "test4" });
+		GroupsTest.Add(new Group { GroupID = 4, Name = "test5" });
+	}
+}

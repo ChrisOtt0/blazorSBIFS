@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace blazorSBIFS.Shared.DataTransferObjects
 {
-    public class UserLoginDto
+    public class UserLoginDto : IJson
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;

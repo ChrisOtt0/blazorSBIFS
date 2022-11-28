@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "blazorSBIFS.Server", "Server\blazorSBIFS.Server.csproj", "{D100810D-F5C9-427F-9D5A-CA0F2E4B1B5D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "blazorSBIFS.Server", "Server\blazorSBIFS.Server.csproj", "{D100810D-F5C9-427F-9D5A-CA0F2E4B1B5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "blazorSBIFS.Client", "Client\blazorSBIFS.Client.csproj", "{382BAD13-0E37-4591-B532-146FD1E71B36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "blazorSBIFS.Client", "Client\blazorSBIFS.Client.csproj", "{382BAD13-0E37-4591-B532-146FD1E71B36}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "blazorSBIFS.Shared", "Shared\blazorSBIFS.Shared.csproj", "{45A36188-568E-4149-82FD-9E6C669DB1B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "blazorSBIFS.Shared", "Shared\blazorSBIFS.Shared.csproj", "{45A36188-568E-4149-82FD-9E6C669DB1B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

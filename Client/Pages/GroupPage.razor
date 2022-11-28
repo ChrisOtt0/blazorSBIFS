@@ -1,0 +1,11 @@
+﻿@page "/group"
+@page "/group/{GroupID:int}"
+
+<PageTitle>Group </PageTitle>
+
+<h3>Group </h3>
+
+@code {
+	[Parameter]
+	public int GroupID { get; set; }
+}

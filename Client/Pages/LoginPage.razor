@@ -1,0 +1,17 @@
+﻿@page "/login"
+@inject ILoginViewModel _viewModel
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login</h1>
+<br />
+<div class="col-12">
+	<input type="text" @bind-value="_viewModel.Email" class="form-control" placeholder="Email.." />
+	<br />
+	<input type="password" @bind-value="_viewModel.Password" class="form-control" placeholder="Password.." />
+	<br />
+	<button class="btn btn-primary" @onclick="_viewModel.Login">Login</button>
+	<span>&nbsp;&nbsp;</span>
+	<a href="/register">Register</a>
+	<span>&nbsp;&nbsp;</span>@_viewModel.Message
+</div>
