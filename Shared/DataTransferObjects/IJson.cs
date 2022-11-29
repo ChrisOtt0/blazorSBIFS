@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace blazorSBIFS.Shared.DataTransferObjects
 {
-    public class GroupDto : IJson
+    public interface IJson
     {
-        public int GroupID { get; set; }
     }
 }
