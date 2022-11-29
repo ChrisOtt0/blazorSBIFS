@@ -1,4 +1,5 @@
 ﻿@page "/register"
+@using System.Diagnostics
 @inject IRegisterViewModel _viewModel
 
 <PageTitle>Register</PageTitle>
@@ -19,3 +20,7 @@
 	<a href="/login">Login</a>
 	<span>&nbsp;&nbsp;</span>@_viewModel.Message
 </div>
+
+@code{
+	public void Submit() => Trace.WriteLine("Test");
+}

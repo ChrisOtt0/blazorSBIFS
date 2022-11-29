@@ -51,7 +51,6 @@ namespace blazorSBIFS.Client.ViewModels
 				Email = this.Email,
 				Password = this.Password,
 			};
-
 			HttpResponseMessage response = await _httpService.Post(baseUrl + url, data);
             
 			switch ((int)response.StatusCode)
