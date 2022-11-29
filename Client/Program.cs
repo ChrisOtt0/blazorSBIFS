@@ -12,7 +12,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 // Add DI Services
 builder.Services.AddSingleton<IHttpService, HttpService>();
-builder.Services.AddSingleton<IJwtService, JwtService>();
+builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddSingleton<IProfileViewModel, ProfileViewModel>();
 builder.Services.AddTransient<ILoginViewModel, LoginViewModel>();
 builder.Services.AddTransient<IRegisterViewModel, RegisterViewModel>();
