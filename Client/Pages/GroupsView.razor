@@ -1,27 +1,35 @@
 ﻿@page "/groups"
-@inject NavigationManager NavigationManager
+@inject IGroupsViewModel _viewModel
+@inject IHttpService _httpService
 
 <PageTitle>Groups</PageTitle>
 
 <div class="col-12">
-
-	@foreach (Group group in GroupsTest) {
-		<a href="/group/@group.GroupID" class="list-group-item list-group-item-action flex-column align-items-start">
-			@group.Name <span> </span></a>
-	}
+	<div class="col-10">
+		@foreach (Group group in _viewModel.Groups) {
+			<a href="/group/@group.GroupID" class="list-group-item list-group-item-action flex-column align-items-start">
+				@group.Name <span> </span></a>
+		}
+		<br />
+		<button class="btn btn-primary" @onclick="_viewModel.NewGroup">New Group</button>
+	</div>
 
 </div>
 
 @code {
-	private List<Group> GroupsTest { get; set; } = new List<Group>();
+	protected override async void OnInitialized()
+	{
+		_viewModel.StateHasChangedDelegate = StateHasChanged;
+		string url = "ReadMany";
+		HttpResponseMessage response = await _httpService.Get(_viewModel.BaseUrl + url);
 
-	protected override async Task OnInitializedAsync() {
-		// Get Groups from User
+		// catching errors
+		if (!response.IsSuccessStatusCode) return;
 
-		GroupsTest.Add(new Group { GroupID = 0, Name = "test1" });
-		GroupsTest.Add(new Group { GroupID = 1, Name = "test2" });
-		GroupsTest.Add(new Group { GroupID = 2, Name = "test3" });
-		GroupsTest.Add(new Group { GroupID = 3, Name = "test4" });
-		GroupsTest.Add(new Group { GroupID = 4, Name = "test5" });
+		List<Group> groups = await response.Content.ReadFromJsonAsync<List<Group>>();
+		if (groups == null) return;
+
+		_viewModel.Groups = groups;
+		StateHasChanged();
 	}
 }

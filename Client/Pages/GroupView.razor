@@ -1,11 +1,48 @@
 ﻿@page "/group"
 @page "/group/{GroupID:int}"
+@inject IGroupViewModel _viewModel
+@inject IHttpService _httpService
 
-<PageTitle>Group </PageTitle>
+<PageTitle>Group @GroupName</PageTitle>
 
-<h3>Group </h3>
+<h3>Group @GroupName</h3>
+
+@if (GroupID == 0) {
+	<div>
+		<h4>Group not found</h4>
+	</div>
+} else {
+	<!-- Add group content for editing here -->
+}
+
 
 @code {
 	[Parameter]
 	public int GroupID { get; set; }
+	public string GroupName { get; set; } = "not found.";
+
+	protected override async void OnInitialized() {
+		string url = "ReadOne";
+		IJson data = new GroupDto
+		{
+			GroupID = this.GroupID
+		};
+		HttpResponseMessage response = await _httpService.Post(_viewModel.BaseUrl + url, data);
+
+		// catching errors
+		if (!response.IsSuccessStatusCode) {
+			GroupID = 0;
+			return;
+		}
+
+		Group? g = await response.Content.ReadFromJsonAsync<Group>();
+		if (g == null) {
+			GroupID = 0;
+			return;
+		}
+
+		_viewModel.Group = g;
+		GroupName = g.Name;
+		StateHasChanged();
+	}
 }
