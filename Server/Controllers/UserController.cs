@@ -21,7 +21,7 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpGet("Read"), Authorize(Roles = "admin, user")]
-        public async Task<ActionResult<object>> Get()
+        public async Task<ActionResult<UserDto>> Get()
         {
             var userID = _userService.GetUserID();
             var login = await _context.UserLogins
@@ -29,10 +29,13 @@ namespace blazorSBIFS.Server.Controllers
                 .Include(l => l.User)
                 .FirstAsync();
 
-            return Ok(new { 
-                name = login.User.Name, 
-                email = login.Email 
-            });
+            IJson data = new UserDto
+            {
+                Name = login.User.Name,
+                Email = login.Email
+            };
+
+            return Ok(data);
         }
 
         [HttpPut("UpdateUser"), Authorize(Roles = "admin, user")]
@@ -80,7 +83,7 @@ namespace blazorSBIFS.Server.Controllers
             string hashedPass = SecurityTools.HashString(request.OldPassword, salt);
 
             if (login.Password != hashedPass)
-                return Forbid("Inaccurate password.");
+                return UnprocessableEntity("Inaccurate password.");
 
             string newHashedPass = SecurityTools.HashString(request.NewPassword, salt);
             login.Password = newHashedPass;
@@ -101,13 +104,13 @@ namespace blazorSBIFS.Server.Controllers
                 return BadRequest("No such user.");
 
             if (login.Email != request.Email)
-                return Forbid("Wrong email or password.");
+                return UnprocessableEntity("Wrong email or password.");
 
             string salt = new SaltAdapter().GetSalt();
             string hashedPass = SecurityTools.HashString(request.Password, salt);
 
             if (login.Password != hashedPass)
-                return Forbid("Wrong email or password.");
+                return UnprocessableEntity("Wrong email or password.");
 
             var user = login.User;
             List<Group> groups = await _context.Groups.Where(g => g.OwnerID == userID).ToListAsync();

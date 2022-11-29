@@ -1,0 +1,26 @@
+﻿@page "/deleteAccount"
+@inject NavigationManager _navigationManager
+@inject IDeleteAccountViewModel _viewModel
+@inject ITokenService _tokenService
+
+<h3>Are you sure you want to delete your account?</h3>
+
+<div class="col-12">
+	Please enter your email and password to delete your account.
+
+	<input type="text" @bind-value="_viewModel.Email" class="form-control" placeholder="Email.." />
+	<br />
+	<input type="password" @bind-value="_viewModel.Password" class="form-control" placeholder="Password.." />
+	<br />
+	<button class="btn btn-danger" @onclick="_viewModel.Submit">Submit</button>
+	<button class="btn btn-secondary" @onclick="@(() => _navigationManager.NavigateTo("/"))">Cancel</button>
+	<span>&nbsp;&nbsp;</span>@_viewModel.Message
+</div>
+
+@code {
+	protected override async void OnInitialized() 
+	{
+		if (_tokenService.Jwt == string.Empty) _navigationManager.NavigateTo("login");
+		_viewModel.StateHasChangedDelegate = StateHasChanged;
+	}
+}

@@ -18,5 +18,7 @@ builder.Services.AddTransient<IRegisterViewModel, RegisterViewModel>();
 builder.Services.AddSingleton<IProfileViewModel, ProfileViewModel>();
 builder.Services.AddTransient<IGroupsViewModel, GroupsViewModel>();
 builder.Services.AddTransient<IGroupViewModel, GroupViewModel>();
+builder.Services.AddTransient<IDeleteAccountViewModel, DeleteAccountViewModel>();
+
 
 await builder.Build().RunAsync();
