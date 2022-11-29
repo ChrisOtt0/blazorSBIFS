@@ -1,5 +1,6 @@
 ﻿using blazorSBIFS.Client.Services;
 using blazorSBIFS.Shared.DataTransferObjects;
+using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 
 namespace blazorSBIFS.Client.ViewModels
@@ -17,16 +18,21 @@ namespace blazorSBIFS.Client.ViewModels
 	{
 		private readonly IHttpService _httpService;
 		private readonly ITokenService _tokenService;
+		private readonly NavigationManager _navigationManager;
 		string baseUrl = "UserLogin/";
 
 		public string Email { get; set; } = string.Empty;
 		public string Password { get; set; } = string.Empty;
 		public string Message { get; set; } = string.Empty;
 
-        public LoginViewModel(IHttpService httpService, ITokenService tokenService)
+        public LoginViewModel(
+			IHttpService httpService, 
+			ITokenService tokenService,
+			NavigationManager navigationManager)
 		{
 			_httpService = httpService;
 			_tokenService = tokenService;
+			_navigationManager = navigationManager;
 		}
 
 		public async Task Login()
@@ -58,10 +64,9 @@ namespace blazorSBIFS.Client.ViewModels
                 // OK
                 case 200:
                     TokenDto json = await response.Content.ReadFromJsonAsync<TokenDto>();
-                    _tokenService.Jwt = json.Jwt;
+					_tokenService.Jwt = json.Jwt;
 
-					// Navigate to profile page
-					Message = "Success!";
+                    _navigationManager.NavigateTo("/");
                     break;
 
                 // BadRequest

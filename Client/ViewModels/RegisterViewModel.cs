@@ -1,5 +1,6 @@
 ﻿using blazorSBIFS.Client.Services;
 using blazorSBIFS.Shared.DataTransferObjects;
+using Microsoft.AspNetCore.Components;
 using System.Diagnostics;
 using System.Net.Http.Json;
 
@@ -21,6 +22,7 @@ namespace blazorSBIFS.Client.ViewModels
 	{
 		private readonly IHttpService _httpService;
 		private readonly ITokenService _tokenService;
+		private readonly NavigationManager _navigationManager;
 		string baseUrl = "UserLogin/";
 
 		public string Name { get; set; } = string.Empty;
@@ -30,10 +32,14 @@ namespace blazorSBIFS.Client.ViewModels
 
 		public string Message { get; set; } = string.Empty;
 
-		public RegisterViewModel(IHttpService httpService, ITokenService tokenService)
+		public RegisterViewModel(
+			IHttpService httpService,
+			ITokenService tokenService,
+			NavigationManager navigationManager)
 		{
 			_httpService = httpService;
 			_tokenService = tokenService;
+			_navigationManager = navigationManager;
 		}
 
         public async Task Submit()
@@ -73,8 +79,7 @@ namespace blazorSBIFS.Client.ViewModels
 					TokenDto json = await response.Content.ReadFromJsonAsync<TokenDto>();
                     _tokenService.Jwt = json.Jwt;
 
-					// Navigate to profile page
-					Message = "Success!";
+					_navigationManager.NavigateTo("/");
 					break;
 
 				case 422:
