@@ -78,7 +78,7 @@ namespace blazorSBIFS.Client.ViewModels
 					break;
 
 				case 422:
-					Message = "Email or password is already taken.";
+					Message = await response.Content.ReadAsStringAsync();
 					Console.WriteLine(Message);
 					break;
 
