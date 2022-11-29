@@ -1,6 +1,7 @@
 ﻿using blazorSBIFS.Client.Extensions;
 using blazorSBIFS.Shared.DataTransferObjects;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace blazorSBIFS.Client.Services
@@ -11,6 +12,7 @@ namespace blazorSBIFS.Client.Services
         public Task<HttpResponseMessage> Post(string url, IJson data);
         public Task<HttpResponseMessage> Put(string url, IJson data);
         public Task<HttpResponseMessage> Delete(string url, IJson data);
+        public void AddAuthorization(string jwt);
     }
 
 	public class HttpService : IHttpService
@@ -29,9 +31,9 @@ namespace blazorSBIFS.Client.Services
             var request = new HttpRequestMessage()
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri(baseUrl + url)
+                RequestUri = new Uri(baseUrl + url),
+                Content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json")
             };
-            request.Content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
             return await client.SendAsync(request);
         }
 
@@ -40,15 +42,20 @@ namespace blazorSBIFS.Client.Services
             var request = new HttpRequestMessage()
             {
                 Method = HttpMethod.Put,
-                RequestUri = new Uri(baseUrl + url)
+                RequestUri = new Uri(baseUrl + url),
+                Content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json")
             };
-            request.Content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
             return await client.SendAsync(request);
         }
 
         public async Task<HttpResponseMessage> Delete(string url, IJson data)
         {
             return await HttpClientExtension.DeleteAsJsonAsync(client, baseUrl + url, data);
+        }
+
+        public void AddAuthorization(string jwt)
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
         }
     }
 }

@@ -65,6 +65,7 @@ namespace blazorSBIFS.Client.ViewModels
                 case 200:
                     TokenDto json = await response.Content.ReadFromJsonAsync<TokenDto>();
 					_tokenService.Jwt = json.Jwt;
+					_httpService.AddAuthorization(_tokenService.Jwt);
 
                     _navigationManager.NavigateTo("/");
                     break;
