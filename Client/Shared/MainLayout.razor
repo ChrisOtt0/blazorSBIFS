@@ -1,13 +1,21 @@
 ﻿@inherits LayoutComponentBase
+@inject ITokenService _tokenService
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    @if (IsLoggedIn()) {
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+    }
 
     <main>
         <div class="top-row px-4">
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+
+            @if (IsLoggedIn()) {
+                <span>&nbsp;&nbsp;</span>
+                <a href="/login" @onclick="Logout">Logout</a>
+            }
         </div>
 
         <article class="content px-4">
@@ -15,3 +23,13 @@
         </article>
     </main>
 </div>
+
+@code {
+    private void Logout() {
+        _tokenService.Jwt = string.Empty;
+    }
+
+    private bool IsLoggedIn() {
+        return _tokenService.Jwt != string.Empty;
+    }
+}

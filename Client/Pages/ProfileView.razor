@@ -1,5 +1,7 @@
 ﻿@page "/"
 @inject IProfileViewModel _viewModel
+@inject ITokenService _tokenService
+@inject NavigationManager _navigationManager
 
 
 <div class="col-12">
@@ -25,5 +27,7 @@
 </div>
 
 @code {
-	
+	protected override async void OnInitialized() {
+		if (_tokenService.Jwt == string.Empty) _navigationManager.NavigateTo("login");
+	}
 }

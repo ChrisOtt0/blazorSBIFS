@@ -2,6 +2,8 @@
 @page "/group/{GroupID:int}"
 @inject IGroupViewModel _viewModel
 @inject IHttpService _httpService
+@inject ITokenService _tokenService
+@inject NavigationManager _navigationManager
 
 <PageTitle>Group @GroupName</PageTitle>
 
@@ -22,6 +24,8 @@
 	public string GroupName { get; set; } = "not found.";
 
 	protected override async void OnInitialized() {
+		if (_tokenService.Jwt == string.Empty) _navigationManager.NavigateTo("login");
+
 		string url = "ReadOne";
 		IJson data = new GroupDto
 		{
