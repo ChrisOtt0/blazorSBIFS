@@ -1,5 +1,7 @@
 ﻿using blazorSBIFS.Client.Services;
 using blazorSBIFS.Shared.DataTransferObjects;
+using System.Diagnostics;
+using System.Net.Http.Json;
 
 namespace blazorSBIFS.Client.ViewModels
 {
@@ -12,7 +14,7 @@ namespace blazorSBIFS.Client.ViewModels
 
 		public string Message { get; set; }
 
-		public void Submit();
+		public Task Submit();
 	}
 
 	public class RegisterViewModel : IRegisterViewModel
@@ -34,9 +36,9 @@ namespace blazorSBIFS.Client.ViewModels
 			_tokenService = tokenService;
 		}
 
-        public async void Submit()
+        public async Task Submit()
 		{
-			Message = "Submitting userdata..";
+			Message = "Loading...";
 			string url = "Register";
 
 			// Inputvalidation
@@ -67,12 +69,17 @@ namespace blazorSBIFS.Client.ViewModels
 
 			switch( (int) response.StatusCode )
 			{
-				case 204:
-					Message = "Account created succesfully. Login to access the service.";
+				case 200:
+					TokenDto json = await response.Content.ReadFromJsonAsync<TokenDto>();
+                    _tokenService.Jwt = json.Jwt;
+
+					// Navigate to profile page
+					Message = "Success!";
 					break;
 
 				case 422:
-					Message = await response.Content.ReadAsStringAsync();
+					Message = "Email or password is already taken.";
+					Console.WriteLine(Message);
 					break;
 
 				case 500:
