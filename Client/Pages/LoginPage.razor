@@ -1,0 +1,19 @@
+﻿@page "/login"
+@inject IHttpService _http
+@inject ITokenService _token
+@inject NavigationManager _nav
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login</h1>
+<br />
+<div class="col-12">
+	<input type="text" @bind-value="Email" class="form-control" placeholder="Email.." />
+	<br />
+	<input type="password" @bind-value="Password" class="form-control" placeholder="Password.." />
+	<br />
+	<button class="btn btn-primary" @onclick="Login">Login</button>
+	<span>&nbsp;&nbsp;</span>
+	<a href="/register">Register</a>
+	<span>&nbsp;&nbsp;</span>@Message
+</div>

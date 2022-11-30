@@ -1,0 +1,18 @@
+﻿@page "/groups"
+@inject IHttpService _http
+@inject ITokenService _token
+@inject NavigationManager _nav
+
+<PageTitle>Groups</PageTitle>
+
+<div class="col-12">
+	<div class="col-10">
+		@foreach (Group group in Groups) {
+			<a href="/group/@group.GroupID" class="list-group-item list-group-item-action flex-column align-items-start">
+				@group.Name <span> </span></a>
+		}
+		<br />
+		<button class="btn btn-primary" @onclick="NewGroup">New Group</button>
+	</div>
+
+</div>

@@ -1,0 +1,24 @@
+﻿@page "/register"
+@inject IHttpService _http
+@inject ITokenService _token
+@inject NavigationManager _nav
+
+<PageTitle>Register</PageTitle>
+
+<h1>Register Page</h1>
+<br />
+<div class="col-12">
+	<input type="text" @bind-value="Name" class="form-control" placeholder="Name.." />
+	<br />
+	<input type="text" @bind-value="Email" class="form-control" placeholder="Email.." />
+	<br />
+	<input type="password" @bind-value="Password" class="form-control" placeholder="Password.." />
+	<br />
+	<input type="password" @bind-value="ConfirmPassword" class="form-control" placeholder="Confirm password.." />
+	<br />
+	<button class="btn btn-primary" @onclick="Submit">Submit</button>
+	<span>&nbsp;&nbsp;</span>
+	<a href="/login">Login</a>
+	<span>&nbsp;&nbsp;</span>@Message
+</div>
+
