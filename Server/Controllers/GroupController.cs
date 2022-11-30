@@ -71,6 +71,36 @@ namespace blazorSBIFS.Server.Controllers
             return new ObjectResult(groups) { StatusCode = StatusCodes.Status201Created };
         }
 
+        [HttpPut("AddParticipant"), Authorize(Roles = "user")]
+        public async Task<ActionResult<Group>> AddParticipant(GroupDto groupRequest, EmailDto participantRequest)
+        {
+            int userID = _userService.GetUserID();
+            var group = await _context.Groups
+                .Where(g => g.GroupID == groupRequest.GroupID)
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group.");
+
+            if (group.OwnerID != userID)
+                return Unauthorized("Only the group owner can invite participants.");
+
+            var participant = await _context.UserLogins
+                .Where(u => u.Email == participantRequest.Email)
+                .Include(u => u.User)
+                .FirstOrDefaultAsync();
+            if (participant == null)
+                return BadRequest("No such user");
+
+            if (group.Participants.Contains(participant.User))
+                return BadRequest("User is already a participant.");
+
+            group.Participants.Add(participant.User);
+            await _context.SaveChangesAsync();
+
+            return Ok(group);
+        }
+
         [HttpDelete("Delete"), Authorize(Roles = "user")]
         public async Task<ActionResult> Delete(GroupDto requested)
         {
