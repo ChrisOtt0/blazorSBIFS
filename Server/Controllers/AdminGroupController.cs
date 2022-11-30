@@ -74,7 +74,24 @@ namespace blazorSBIFS.Server.Controllers
             return new ObjectResult(groups) { StatusCode = StatusCodes.Status201Created };
         }
 
-        // Add and Remove Participants needs to be added
+        [HttpPut("UpdateName"), Authorize(Roles = "admin")]
+        public async Task<ActionResult<Group>> UpdateName(GroupNameDto request)
+        {
+            if (request.Name == null || request.Name == "")
+                return BadRequest("Request incomplete.");
+
+            var group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupID)
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group.");
+
+            group.Name = request.Name;
+            await _context.SaveChangesAsync();
+            return Ok(group);
+        }
+
         [HttpPut("AddParticipant"), Authorize(Roles = "admin")]
         public async Task<ActionResult<Group>> AddParticipant(GroupParticipantDto request)
         {
