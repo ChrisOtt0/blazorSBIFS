@@ -1,4 +1,6 @@
-﻿using blazorSBIFS.Client.Services;
+﻿using blazorSBIFS.Client.Pages;
+using blazorSBIFS.Client.Services;
+using blazorSBIFS.Shared.DataTransferObjects;
 using blazorSBIFS.Shared.Models;
 
 namespace blazorSBIFS.Client.ViewModels
@@ -13,6 +15,10 @@ namespace blazorSBIFS.Client.ViewModels
 
         public string ChangesMessage { get; set; }
         public string PasswordMessage { get; set; }
+
+        public string BaseUrl { get; }
+
+        public Action StateHasChangedDelegate { get; set; }
 
         public void SaveChanges();
         public void UpdatePassword();
@@ -31,23 +37,67 @@ namespace blazorSBIFS.Client.ViewModels
         public string ChangesMessage { get; set; } = string.Empty;
         public string PasswordMessage { get; set; } = string.Empty;
 
+        public string BaseUrl { get; } = "User/";
+
+        public Action StateHasChangedDelegate { get; set; }
+
         public ProfileViewModel(IHttpService httpService)
         {
             _httpService = httpService;
-
-            // Add logic to get user from database, and fill in Name and Email properties on this ViewModel
-            Name = "John";
-            Email = "test@gmail.com";
         }
 
-        public void SaveChanges()
+        public async void SaveChanges()
         {
+            string url = "UpdateUser";
             ChangesMessage = "Saving changes...";
+            StateHasChangedDelegate();
+
+            IJson data = new UserDto
+            {
+                Name = this.Name,
+                Email = this.Email
+            };
+            HttpResponseMessage response = await _httpService.Put(BaseUrl + url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ChangesMessage = await response.Content.ReadAsStringAsync();
+                StateHasChangedDelegate();
+                return;
+            }
+
+            ChangesMessage = "Update successful!";
+            StateHasChangedDelegate();
         }
 
-        public void UpdatePassword()
+        public async void UpdatePassword()
         {
+            string url = "UpdatePassword";
+
+            if (NewPassword != ConfirmNew)
+            {
+                PasswordMessage = "Passwords do not match.";
+                StateHasChangedDelegate();
+                return;
+            }
+
             PasswordMessage = "Updating password...";
+            StateHasChangedDelegate();
+
+            IJson data = new PasswordDto
+            {
+                OldPassword = this.OldPassword,
+                NewPassword = this.NewPassword,
+            };
+            HttpResponseMessage response = await _httpService.Put(BaseUrl + url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                PasswordMessage = await response.Content.ReadAsStringAsync();
+                StateHasChangedDelegate();
+                return;
+            }
+
+            PasswordMessage = "Password updated successfully!";
+            StateHasChangedDelegate();
         }
     }
 }

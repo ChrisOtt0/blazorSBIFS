@@ -1,6 +1,8 @@
 ﻿@page "/groups"
 @inject IGroupsViewModel _viewModel
 @inject IHttpService _httpService
+@inject ITokenService _tokenService
+@inject NavigationManager _navigationManager
 
 <PageTitle>Groups</PageTitle>
 
@@ -19,6 +21,8 @@
 @code {
 	protected override async void OnInitialized()
 	{
+		if (_tokenService.Jwt == string.Empty) _navigationManager.NavigateTo("login");
+
 		_viewModel.StateHasChangedDelegate = StateHasChanged;
 		string url = "ReadMany";
 		HttpResponseMessage response = await _httpService.Get(_viewModel.BaseUrl + url);

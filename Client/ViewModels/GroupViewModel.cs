@@ -23,7 +23,5 @@ namespace blazorSBIFS.Client.ViewModels
 		{
 			_httpService = httpService;
 		}
-
-
     }
 }
