@@ -19,7 +19,7 @@ namespace blazorSBIFS.Server.Controllers
             _userService = userService;
         }
 
-        [HttpPost("ReadOne"), Authorize(Roles = "user")]
+        [HttpPost("ReadOne"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<Group>> ReadOne(GroupDto requested)
         {
             int userID = _userService.GetUserID();
@@ -34,7 +34,7 @@ namespace blazorSBIFS.Server.Controllers
             return Ok(group);
         }
 
-        [HttpGet("ReadMany"), Authorize(Roles = "user")]
+        [HttpGet("ReadMany"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<List<Group>>> ReadMany()
         {
             int userID = _userService.GetUserID();
@@ -47,7 +47,7 @@ namespace blazorSBIFS.Server.Controllers
             return Ok(groups);
         }
 
-        [HttpPost("ReadParticipants"), Authorize(Roles = "user")]
+        [HttpPost("ReadParticipants"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<List<User>>> ReadParticipants(GroupDto request)
         {
             var participants = await _context.Groups
@@ -58,7 +58,7 @@ namespace blazorSBIFS.Server.Controllers
             return Ok(participants);
         }
 
-        [HttpPost("Create"), Authorize(Roles = "user")]
+        [HttpPost("Create"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<List<Group>>> Create()
         {
             int userID = _userService.GetUserID();
@@ -82,7 +82,7 @@ namespace blazorSBIFS.Server.Controllers
             return new ObjectResult(groups) { StatusCode = StatusCodes.Status201Created };
         }
 
-        [HttpPut("AddParticipant"), Authorize(Roles = "user")]
+        [HttpPut("AddParticipant"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<Group>> AddParticipant(GroupDto groupRequest, EmailDto participantRequest)
         {
             int userID = _userService.GetUserID();
@@ -112,7 +112,7 @@ namespace blazorSBIFS.Server.Controllers
             return Ok(group);
         }
 
-        [HttpPut("RemoveParticipant"), Authorize(Roles = "user")]
+        [HttpPut("RemoveParticipant"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<Group>> RemoveParticipant(GroupDto groupRequest, EmailDto participantRequest)
         {
             int userID = _userService.GetUserID();
@@ -142,7 +142,7 @@ namespace blazorSBIFS.Server.Controllers
             return Ok(group);
         }
 
-        [HttpDelete("Delete"), Authorize(Roles = "user")]
+        [HttpDelete("Delete"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult> Delete(GroupDto requested)
         {
             int userID = _userService.GetUserID();
