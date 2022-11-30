@@ -15,6 +15,26 @@
 	</div>
 } else {
 	<!-- Add group content for editing here -->
+	<div class="column-10">
+		<div>
+			<input type="text" @bind-value="_viewModel.Group.Name" class="form-control"/>
+			<br />
+			<button class="btn btn-primary" @onclick="@(() => _viewModel.UpdateName())">Update</button>
+		</div>
+		<br />
+		<h5 style="font-weight: bold">Participants</h5>
+		<div class="col-8">
+			@foreach (User user in _viewModel.Group.Participants)
+			{
+				<p>
+					@user.Name
+					<button @onclick="@(() => _viewModel.RemoveParticipant(user))" class="btn btn-danger" style="float: right">Remove</button>
+				</p>
+			}
+		</div>
+		<br />
+		<button class="btn btn-primary">Add Participant</button>
+	</div>
 }
 
 
@@ -25,6 +45,8 @@
 
 	protected override async void OnInitialized() {
 		if (_tokenService.Jwt == string.Empty) _navigationManager.NavigateTo("login");
+		_viewModel.StateHasChangedDelegate = StateHasChanged;
+		_viewModel.GroupName = this.GroupName;
 
 		string url = "ReadOne";
 		IJson data = new GroupDto
