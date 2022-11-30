@@ -19,7 +19,7 @@ namespace blazorSBIFS.Server.Controllers
             _userService = userService;
         }
 
-        [HttpPost("ReadOne"), Authorize(Roles = "user")]
+        [HttpPost("ReadOne"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<Group>> ReadOne(GroupDto requested)
         {
             int userID = _userService.GetUserID();
@@ -34,7 +34,7 @@ namespace blazorSBIFS.Server.Controllers
             return Ok(group);
         }
 
-        [HttpGet("ReadMany"), Authorize(Roles = "user")]
+        [HttpGet("ReadMany"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<List<Group>>> ReadMany()
         {
             int userID = _userService.GetUserID();
@@ -47,7 +47,18 @@ namespace blazorSBIFS.Server.Controllers
             return Ok(groups);
         }
 
-        [HttpPost("Create"), Authorize(Roles = "user")]
+        [HttpPost("ReadParticipants"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<List<User>>> ReadParticipants(GroupDto request)
+        {
+            var participants = await _context.Groups
+                .Where(g => g.GroupID == request.GroupID)
+                .Select(g => g.Participants)
+                .ToListAsync();
+
+            return Ok(participants);
+        }
+
+        [HttpPost("Create"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<List<Group>>> Create()
         {
             int userID = _userService.GetUserID();
@@ -71,7 +82,73 @@ namespace blazorSBIFS.Server.Controllers
             return new ObjectResult(groups) { StatusCode = StatusCodes.Status201Created };
         }
 
-        [HttpDelete("Delete"), Authorize(Roles = "user")]
+        [HttpPut("AddParticipant"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<Group>> AddParticipant(GroupParticipantDto request)
+        {
+            if (request.GroupRequest == null || request.ParticipantRequest == null)
+                return BadRequest("Request incomplete.");
+
+            int userID = _userService.GetUserID();
+            var group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupRequest.GroupID)
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group.");
+
+            if (group.OwnerID != userID)
+                return Unauthorized("Only the group owner can invite participants.");
+
+            var participant = await _context.UserLogins
+                .Where(u => u.Email == request.ParticipantRequest.Email)
+                .Include(u => u.User)
+                .FirstOrDefaultAsync();
+            if (participant == null)
+                return BadRequest("No such user");
+
+            if (group.Participants.Contains(participant.User))
+                return BadRequest("User is already a participant.");
+
+            group.Participants.Add(participant.User);
+            await _context.SaveChangesAsync();
+
+            return Ok(group);
+        }
+
+        [HttpPut("RemoveParticipant"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<Group>> RemoveParticipant(GroupParticipantDto request)
+        {
+            if (request.GroupRequest == null || request.ParticipantRequest == null)
+                return BadRequest("Request incomplete.");
+
+            int userID = _userService.GetUserID();
+            var group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupRequest.GroupID)
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group.");
+
+            if (group.OwnerID != userID)
+                return Unauthorized("Only the group owner can remove participants.");
+
+            var participant = await _context.UserLogins
+                .Where(u => u.Email == request.ParticipantRequest.Email)
+                .Include(u => u.User)
+                .FirstOrDefaultAsync();
+            if (participant == null)
+                return BadRequest("No such user");
+
+            if (!group.Participants.Contains(participant.User))
+                return BadRequest("User is not a participant in the selected group.");
+
+            group.Participants.Remove(participant.User);
+            await _context.SaveChangesAsync();
+
+            return Ok(group);
+        }
+
+        [HttpDelete("Delete"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult> Delete(GroupDto requested)
         {
             int userID = _userService.GetUserID();

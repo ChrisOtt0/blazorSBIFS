@@ -74,6 +74,67 @@ namespace blazorSBIFS.Server.Controllers
             return new ObjectResult(groups) { StatusCode = StatusCodes.Status201Created };
         }
 
+        // Add and Remove Participants needs to be added
+        [HttpPut("AddParticipant"), Authorize(Roles = "admin")]
+        public async Task<ActionResult<Group>> AddParticipant(GroupParticipantDto request)
+        {
+            if (request.GroupRequest == null || request.ParticipantRequest == null)
+                return BadRequest("Request incomplete.");
+
+            int userID = _userService.GetUserID();
+            var group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupRequest.GroupID)
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group.");
+
+            var participant = await _context.UserLogins
+                .Where(u => u.Email == request.ParticipantRequest.Email)
+                .Include(u => u.User)
+                .FirstOrDefaultAsync();
+            if (participant == null)
+                return BadRequest("No such user");
+
+            if (group.Participants.Contains(participant.User))
+                return BadRequest("User is already a participant.");
+
+            group.Participants.Add(participant.User);
+            await _context.SaveChangesAsync();
+
+            return Ok(group);
+        }
+
+        [HttpPut("RemoveParticipant"), Authorize(Roles = "admin")]
+        public async Task<ActionResult<Group>> RemoveParticipant(GroupParticipantDto request)
+        {
+            if (request.GroupRequest == null || request.ParticipantRequest == null)
+                return BadRequest("Request incomplete.");
+
+            int userID = _userService.GetUserID();
+            var group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupRequest.GroupID)
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group.");
+
+            var participant = await _context.UserLogins
+                .Where(u => u.Email == request.ParticipantRequest.Email)
+                .Include(u => u.User)
+                .FirstOrDefaultAsync();
+            if (participant == null)
+                return BadRequest("No such user");
+
+            if (!group.Participants.Contains(participant.User))
+                return BadRequest("User is not a participant in the selected group.");
+
+            group.Participants.Remove(participant.User);
+            await _context.SaveChangesAsync();
+
+            return Ok(group);
+        }
+
         [HttpDelete("Delete"), Authorize(Roles = "admin")]
         public async Task<ActionResult> Delete(GroupDto request)
         {
