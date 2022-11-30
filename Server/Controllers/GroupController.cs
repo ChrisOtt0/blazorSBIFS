@@ -19,8 +19,8 @@ namespace blazorSBIFS.Server.Controllers
             _userService = userService;
         }
 
-        [HttpGet("ReadOne"), Authorize(Roles = "user")]
-        public async Task<ActionResult<Group>> Get(GroupDto requested)
+        [HttpPost("ReadOne"), Authorize(Roles = "user")]
+        public async Task<ActionResult<Group>> ReadOne(GroupDto requested)
         {
             int userID = _userService.GetUserID();
             var group = await _context.Groups
@@ -35,7 +35,7 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpGet("ReadMany"), Authorize(Roles = "user")]
-        public async Task<ActionResult<List<Group>>> Get()
+        public async Task<ActionResult<List<Group>>> ReadMany()
         {
             int userID = _userService.GetUserID();
             // Necessity for a group name which is returned instead? 

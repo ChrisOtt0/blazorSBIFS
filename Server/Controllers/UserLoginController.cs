@@ -48,7 +48,8 @@ namespace blazorSBIFS.Server.Controllers
             await _context.UserLogins.AddAsync(ul);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            var jwt = JwtTools.CreateToken(u);
+            return Ok(new { jwt });
         }
 
         // Change to accomodate change in Models (User <-> UserLogin)

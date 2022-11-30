@@ -1,0 +1,50 @@
+﻿@page "/"
+@inject IProfileViewModel _viewModel
+@inject IHttpService _httpService
+@inject ITokenService _tokenService
+@inject NavigationManager _navigationManager
+
+
+<div class="col-12">
+	<input type="text" @bind-value="_viewModel.Name" class="form-control" placeholder="Name" />
+	<br />
+	<input type="text" @bind-value="_viewModel.Email" class="form-control" placeholder="Email" />
+	<br />
+	<button class="btn btn-primary" @onclick="_viewModel.SaveChanges">Save Changes</button>
+	<span>&nbsp;&nbsp;</span>@_viewModel.ChangesMessage
+	<br />
+	<br />
+	<br />
+	<br />
+	<input type="password" @bind-value="_viewModel.OldPassword" class="form-control" placeholder="Old password" />
+	<br />
+	<input type="password" @bind-value="_viewModel.NewPassword" class="form-control" placeholder="New password" />
+	<br />
+	<input type="password" @bind-value="_viewModel.ConfirmNew" class="form-control" placeholder="Confirm new password" />
+	<br />
+	<button class="btn btn-primary" @onclick="_viewModel.UpdatePassword">Update Password</button>
+	<span>&nbsp;&nbsp;</span>@_viewModel.PasswordMessage
+	<br />
+	<br />
+	<button class="btn btn-danger" @onclick="@(() => _navigationManager.NavigateTo("/deleteAccount"))">Delete Account</button>
+</div>
+
+@code {
+	protected override async void OnInitialized() {
+		if (_tokenService.Jwt == string.Empty) _navigationManager.NavigateTo("login");
+		_viewModel.StateHasChangedDelegate = StateHasChanged;
+
+		string url = "Read";
+		HttpResponseMessage response = await _httpService.Get(_viewModel.BaseUrl + url);
+
+		// Handle errors
+		if (!response.IsSuccessStatusCode) return;
+
+		UserDto? user = await response.Content.ReadFromJsonAsync<UserDto>();
+		if (user == null) return;
+
+		_viewModel.Name = user.Name;
+		_viewModel.Email = user.Email;
+		StateHasChanged();
+	}
+}
