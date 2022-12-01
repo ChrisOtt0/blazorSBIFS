@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace blazorSBIFS.Shared.DataTransferObjects
 {
-    public class GroupParticipantDto : IJson
+    public class ActivityDto
     {
-        public GroupDto? GroupRequest { get; set; }
-        public EmailDto? ParticipantRequest { get; set; }
+        public int ActivityID { get; set; }
     }
 }

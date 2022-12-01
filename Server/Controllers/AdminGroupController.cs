@@ -16,20 +16,6 @@ namespace blazorSBIFS.Server.Controllers
             _userService = userService;
         }
 
-        [HttpGet("ReadOne"), Authorize(Roles = "admin")]
-        public async Task<ActionResult<Group>> Get(GroupDto requested)
-        {
-            var group = await _context.Groups
-                .Where(g => g.GroupID == requested.GroupID)
-                .Include(g => g.Participants)
-                .FirstAsync();
-
-            if (group == null)
-                return BadRequest("No such group.");
-
-            return Ok(group);
-        }
-
         [HttpGet("ReadMany"), Authorize(Roles = "admin")]
         public async Task<ActionResult<List<Group>>> Get(EmailDto request)
         {
@@ -93,7 +79,7 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpPut("AddParticipant"), Authorize(Roles = "admin")]
-        public async Task<ActionResult<Group>> AddParticipant(GroupParticipantDto request)
+        public async Task<ActionResult<Group>> AddParticipant(GroupUserDto request)
         {
             if (request.GroupRequest == null || request.ParticipantRequest == null)
                 return BadRequest("Request incomplete.");
@@ -123,7 +109,7 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpPut("RemoveParticipant"), Authorize(Roles = "admin")]
-        public async Task<ActionResult<Group>> RemoveParticipant(GroupParticipantDto request)
+        public async Task<ActionResult<Group>> RemoveParticipant(GroupUserDto request)
         {
             if (request.GroupRequest == null || request.ParticipantRequest == null)
                 return BadRequest("Request incomplete.");

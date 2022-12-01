@@ -20,8 +20,8 @@ namespace blazorSBIFS.Server.Controllers
             _userService = userService;
         }
 
-        [HttpGet("Read"), Authorize(Roles = "admin, user")]
-        public async Task<ActionResult<UserDto>> Get()
+        [HttpGet("ReadOne"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<UserDto>> ReadOne()
         {
             var userID = _userService.GetUserID();
             var login = await _context.UserLogins
@@ -31,11 +31,33 @@ namespace blazorSBIFS.Server.Controllers
 
             IJson data = new UserDto
             {
+                UserID = userID,
                 Name = login.User.Name,
                 Email = login.Email
             };
 
             return Ok(data);
+        }
+
+        [HttpGet("ReadMany"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<List<UserDto>>> ReadMany()
+        {
+            List<UserLogin> logins = await _context.UserLogins
+                .Include(l => l.User)
+                .ToListAsync();
+
+            List<UserDto> users = new List<UserDto>();
+            foreach (UserLogin login in logins)
+            {
+                users.Add(new UserDto
+                {
+                    UserID = login.User.UserID,
+                    Name = login.User.Name,
+                    Email = login.Email
+                });
+            }
+
+            return Ok(users);
         }
 
         [HttpPut("UpdateUser"), Authorize(Roles = "admin, user")]
