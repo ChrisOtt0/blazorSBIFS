@@ -5,8 +5,8 @@ using System.Net.Http.Json;
 
 namespace blazorSBIFS.Client.Pages
 {
-	public partial class GroupPage
-	{
+    public partial class GroupPage
+    {
         string baseUrl = "Group/";
 
         [Parameter]
@@ -55,5 +55,26 @@ namespace blazorSBIFS.Client.Pages
             Group.Participants.Remove(user);
             StateHasChanged();
         }
+        public void AddParticipant(User user) //Add participants method is not implemented yet into the .razor file
+        {
+            Group.Participants.Add(user);
+            StateHasChanged();
+        }
+        /*public void SaveChanges() //Add participants method is not implemented yet into the .razor file
+        {
+            string url = "Update";
+            IJson data = new GroupDto
+            {
+                GroupID = this.GroupID,
+                Name = Group.Name,
+                Participants = Group.Participants
+            };
+            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                GroupID = 0;
+                return;
+            }
+            UpdateName(); */
     }
 }
