@@ -1,0 +1,29 @@
+﻿@page "/"
+@inject IHttpService _http
+@inject ITokenService _token
+@inject NavigationManager _nav
+
+
+<div class="col-12">
+	<input type="text" @bind-value="Name" class="form-control" placeholder="Name" />
+	<br />
+	<input type="text" @bind-value="Email" class="form-control" placeholder="Email" />
+	<br />
+	<button class="btn btn-primary" @onclick="SaveChanges">Save Changes</button>
+	<span>&nbsp;&nbsp;</span>@ChangesMessage
+	<br />
+	<br />
+	<br />
+	<br />
+	<input type="password" @bind-value="OldPassword" class="form-control" placeholder="Old password" />
+	<br />
+	<input type="password" @bind-value="NewPassword" class="form-control" placeholder="New password" />
+	<br />
+	<input type="password" @bind-value="ConfirmNew" class="form-control" placeholder="Confirm new password" />
+	<br />
+	<button class="btn btn-primary" @onclick="UpdatePassword">Update Password</button>
+	<span>&nbsp;&nbsp;</span>@PasswordMessage
+	<br />
+	<br />
+	<button class="btn btn-danger" @onclick="@(() => _nav.NavigateTo("/deleteAccount"))">Delete Account</button>
+</div>
