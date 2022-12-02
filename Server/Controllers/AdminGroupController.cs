@@ -16,7 +16,7 @@ namespace blazorSBIFS.Server.Controllers
             _userService = userService;
         }
 
-        [HttpGet("ReadMany"), Authorize(Roles = "admin")]
+        [HttpPost("ReadMany"), Authorize(Roles = "admin")]
         public async Task<ActionResult<List<Group>>> Get(EmailDto request)
         {
             var login = await _context.UserLogins
@@ -81,7 +81,7 @@ namespace blazorSBIFS.Server.Controllers
         [HttpPut("AddParticipant"), Authorize(Roles = "admin")]
         public async Task<ActionResult<Group>> AddParticipant(GroupUserDto request)
         {
-            if (request.GroupRequest == null || request.ParticipantRequest == null)
+            if (request.GroupRequest == null || request.UserRequest == null)
                 return BadRequest("Request incomplete.");
 
             int userID = _userService.GetUserID();
@@ -93,7 +93,7 @@ namespace blazorSBIFS.Server.Controllers
                 return BadRequest("No such group.");
 
             var participant = await _context.UserLogins
-                .Where(u => u.Email == request.ParticipantRequest.Email)
+                .Where(u => u.Email == request.UserRequest.Email)
                 .Include(u => u.User)
                 .FirstOrDefaultAsync();
             if (participant == null)
@@ -111,7 +111,7 @@ namespace blazorSBIFS.Server.Controllers
         [HttpPut("RemoveParticipant"), Authorize(Roles = "admin")]
         public async Task<ActionResult<Group>> RemoveParticipant(GroupUserDto request)
         {
-            if (request.GroupRequest == null || request.ParticipantRequest == null)
+            if (request.GroupRequest == null || request.UserRequest == null)
                 return BadRequest("Request incomplete.");
 
             int userID = _userService.GetUserID();
@@ -123,7 +123,7 @@ namespace blazorSBIFS.Server.Controllers
                 return BadRequest("No such group.");
 
             var participant = await _context.UserLogins
-                .Where(u => u.Email == request.ParticipantRequest.Email)
+                .Where(u => u.Email == request.UserRequest.Email)
                 .Include(u => u.User)
                 .FirstOrDefaultAsync();
             if (participant == null)
