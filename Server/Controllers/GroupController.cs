@@ -22,7 +22,6 @@ namespace blazorSBIFS.Server.Controllers
         [HttpPost("ReadOne"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<Group>> ReadOne(GroupDto requested)
         {
-            int userID = _userService.GetUserID();
             var group = await _context.Groups
                 .Where(g => g.GroupID == requested.GroupID)
                 .Include(g => g.Participants)
@@ -82,6 +81,22 @@ namespace blazorSBIFS.Server.Controllers
             return new ObjectResult(groups) { StatusCode = StatusCodes.Status201Created };
         }
 
+        [HttpPut("UpdateGroup"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult> UpdateGroup(Group request)
+        {
+            var group = await _context.Groups.
+                Where(g => g.GroupID == request.GroupID)
+                .Include(g => g.Participants)
+                .Include(g => g.Activities)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group");
+
+            group = request;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         [HttpPut("UpdateName"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<Group>> UpdateName(GroupNameDto request)
         {
@@ -105,9 +120,9 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpPut("AddParticipant"), Authorize(Roles = "admin, user")]
-        public async Task<ActionResult<Group>> AddParticipant(GroupParticipantDto request)
+        public async Task<ActionResult<Group>> AddParticipant(GroupUserDto request)
         {
-            if (request.GroupRequest == null || request.ParticipantRequest == null)
+            if (request.GroupRequest == null || request.UserRequest == null)
                 return BadRequest("Request incomplete.");
 
             int userID = _userService.GetUserID();
@@ -122,7 +137,7 @@ namespace blazorSBIFS.Server.Controllers
                 return Unauthorized("Only the group owner can invite participants.");
 
             var participant = await _context.UserLogins
-                .Where(u => u.Email == request.ParticipantRequest.Email)
+                .Where(u => u.Email == request.UserRequest.Email)
                 .Include(u => u.User)
                 .FirstOrDefaultAsync();
             if (participant == null)
@@ -138,9 +153,9 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpPut("RemoveParticipant"), Authorize(Roles = "admin, user")]
-        public async Task<ActionResult<Group>> RemoveParticipant(GroupParticipantDto request)
+        public async Task<ActionResult<Group>> RemoveParticipant(GroupUserDto request)
         {
-            if (request.GroupRequest == null || request.ParticipantRequest == null)
+            if (request.GroupRequest == null || request.UserRequest == null)
                 return BadRequest("Request incomplete.");
 
             int userID = _userService.GetUserID();
@@ -155,7 +170,7 @@ namespace blazorSBIFS.Server.Controllers
                 return Unauthorized("Only the group owner can remove participants.");
 
             var participant = await _context.UserLogins
-                .Where(u => u.Email == request.ParticipantRequest.Email)
+                .Where(u => u.Email == request.UserRequest.Email)
                 .Include(u => u.User)
                 .FirstOrDefaultAsync();
             if (participant == null)
