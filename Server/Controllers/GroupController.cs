@@ -92,7 +92,40 @@ namespace blazorSBIFS.Server.Controllers
             if (group == null)
                 return BadRequest("No such group");
 
-            group = request;
+            _context.Entry(group).CurrentValues.SetValues(request);
+
+            // Update Participants
+            List<User> users = group.Participants.ToList();
+            foreach (User u in users)
+            {
+                User? participant = request.Participants.SingleOrDefault(r => r.UserID == u.UserID);
+                if (participant == null)
+                    group.Participants.Remove(u);
+            }
+
+            foreach (User participant in request.Participants)
+            {
+                User? u = group.Participants.SingleOrDefault(u => u.UserID == participant.UserID);
+                if (u == null)
+                    group.Participants.Add(participant);
+            }
+
+            // Update Activities
+            List<Activity> activities = group.Activities.ToList();
+            foreach (Activity a in activities)
+            {
+                Activity? activity = request.Activities.SingleOrDefault(r => r.ActivityID == a.ActivityID);
+                if (activity == null)
+                    group.Activities.Remove(a);
+            }
+
+            foreach (Activity activity in request.Activities)
+            {
+                Activity? a = group.Activities.SingleOrDefault(g => g.ActivityID == activity.ActivityID);
+                if (a == null)
+                    group.Activities.Add(activity);
+            }
+
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -175,6 +208,9 @@ namespace blazorSBIFS.Server.Controllers
                 .FirstOrDefaultAsync();
             if (participant == null)
                 return BadRequest("No such user");
+
+            if (participant.UserID == group.OwnerID)
+                return Unauthorized("Cannot remove the owner of the group.");
 
             if (!group.Participants.Contains(participant.User))
                 return BadRequest("User is not a participant in the selected group.");

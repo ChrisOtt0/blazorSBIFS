@@ -21,7 +21,7 @@ namespace blazorSBIFS.Server.Controllers
         {
             var login = await _context.UserLogins
                 .Where(l => l.Email == request.Email)
-                .FirstAsync();
+                .FirstOrDefaultAsync();
             if (login == null)
                 return BadRequest("No such user.");
 
@@ -128,6 +128,9 @@ namespace blazorSBIFS.Server.Controllers
                 .FirstOrDefaultAsync();
             if (participant == null)
                 return BadRequest("No such user");
+
+            if (participant.UserID == group.OwnerID)
+                return Unauthorized("Cannot remove the owner of the group.");
 
             if (!group.Participants.Contains(participant.User))
                 return BadRequest("User is not a participant in the selected group.");
