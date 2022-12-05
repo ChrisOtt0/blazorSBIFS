@@ -6,11 +6,6 @@ using System.Threading.Tasks;
 
 namespace blazorSBIFS.Shared.Models
 {
-    public enum Privileges
-    {
-        admin,
-        user
-    }
 
     public class User
     {

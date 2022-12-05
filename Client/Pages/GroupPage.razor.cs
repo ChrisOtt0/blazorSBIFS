@@ -2,6 +2,8 @@
 using blazorSBIFS.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text.Json.Serialization;
 
 namespace blazorSBIFS.Client.Pages
 {
@@ -82,20 +84,14 @@ namespace blazorSBIFS.Client.Pages
                 Name = Group.Name,
                 Participants = Group.Participants
             };
-            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
+            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
             {
                 GroupID = 0;
                 return;
             }
             UpdateName();
-    }
-        /// <summary>
-        /// It reads the group data from the server and updates the name of the group
-        /// </summary>
-        /// <returns>
-        /// A Group object.
-        /// </returns>
+        }
         public void ReadGroupData()
         {
             string url = "ReadOne";
@@ -103,7 +99,7 @@ namespace blazorSBIFS.Client.Pages
             {
                 GroupID = GroupID
             };
-            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
+            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
             {
                 GroupID = 0;
@@ -118,21 +114,14 @@ namespace blazorSBIFS.Client.Pages
             Group = g;
             UpdateName();
         }
-        /// <summary>
-        /// The function takes the GroupID from the view model and sends it to the server. If the server returns a success
-        /// code, the user is navigated to the groups page
-        /// </summary>
-        /// <returns>
-        /// A HttpResponseMessage
-        /// </returns>
-        public void DeleteGroup()
+        public void OwnerDeletesGroup()
         {
             string url = "Delete";
             IJson data = new GroupDto
             {
                 GroupID = GroupID
             };
-            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
+            HttpResponseMessage response = _http.Delete(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
             {
                 GroupID = 0;
@@ -140,14 +129,7 @@ namespace blazorSBIFS.Client.Pages
             }
             _nav.NavigateTo("groups");
         }
-        public void OwnerInvitesUsers()
-        {
-            _nav.NavigateTo("invite/" + GroupID);
-        }
-        public void OwnerRemovesUsers()
-        {
-            _nav.NavigateTo("remove/" + GroupID);
-        }
+
         public void OwnerRemovesUser(User user)
         {
             RemoveParticipant(user);
@@ -157,10 +139,30 @@ namespace blazorSBIFS.Client.Pages
                 GroupID = GroupID,
                 Participants = new List<User> { user }
             };
-            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
+            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
             {
-                GroupID = 0;
+                string error = response.Content.ReadAsStringAsync().Result;
+                Console.WriteLine(error);
+                return;
+            }
+            StateHasChanged();
+        }
+
+        public void OwnerInvitesUsers(User user) //
+        {
+            AddParticipant(user);
+            string url = "InviteUser";
+            IJson data = new GroupDto
+            {
+                GroupID = GroupID,
+                Participants = new List<User> { user }
+            };
+            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                string error = response.Content.ReadAsStringAsync().Result;
+                Console.WriteLine(error);
                 return;
             }
             StateHasChanged();
