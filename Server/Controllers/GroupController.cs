@@ -26,7 +26,7 @@ namespace blazorSBIFS.Server.Controllers
                 .Where(g => g.GroupID == requested.GroupID)
                 .Include(g => g.Participants)
                 .Include(g => g.Activities)
-                .FirstAsync();
+                .FirstOrDefaultAsync();
             if (group == null)
                 return BadRequest("No such group.");
 
@@ -44,6 +44,19 @@ namespace blazorSBIFS.Server.Controllers
                 .Include(g => g.Activities)
                 .ToListAsync();
             return Ok(groups);
+        }
+
+        [HttpPost("IsOwner"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<bool>> IsOwner(GroupDto request)
+        {
+            int userID = _userService.GetUserID();
+            var group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupID)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group");
+
+            return Ok(userID == group.OwnerID);
         }
 
         [HttpPost("ReadParticipants"), Authorize(Roles = "admin, user")]
