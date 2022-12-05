@@ -3,6 +3,7 @@ using blazorSBIFS.Shared.DataTransferObjects;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
+using blazorSBIFS.Shared.Models;
 
 namespace blazorSBIFS.Client.Services
 {

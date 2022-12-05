@@ -20,7 +20,7 @@ namespace blazorSBIFS.Client.Pages
         {
             if (_token.Jwt == string.Empty) _nav.NavigateTo("login");
 
-            string url = "Read";
+            string url = "ReadOne";
             HttpResponseMessage response = await _http.Get(baseUrl + url);
 
             // Handle errors
