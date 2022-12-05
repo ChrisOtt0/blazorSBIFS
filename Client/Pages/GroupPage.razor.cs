@@ -81,8 +81,6 @@ namespace blazorSBIFS.Client.Pages
             IJson data = new GroupDto
             {
                 GroupID = GroupID,
-                Name = Group.Name,
-                Participants = Group.Participants
             };
             HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
@@ -137,7 +135,6 @@ namespace blazorSBIFS.Client.Pages
             IJson data = new GroupDto
             {
                 GroupID = GroupID,
-                Participants = new List<User> { user }
             };
             HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
@@ -156,7 +153,6 @@ namespace blazorSBIFS.Client.Pages
             IJson data = new GroupDto
             {
                 GroupID = GroupID,
-                Participants = new List<User> { user }
             };
             HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
