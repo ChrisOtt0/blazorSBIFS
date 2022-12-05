@@ -140,6 +140,30 @@ namespace blazorSBIFS.Client.Pages
             }
             _nav.NavigateTo("groups");
         }
-        
+        public void OwnerInvitesUsers()
+        {
+            _nav.NavigateTo("invite/" + GroupID);
+        }
+        public void OwnerRemovesUsers()
+        {
+            _nav.NavigateTo("remove/" + GroupID);
+        }
+        public void OwnerRemovesUser(User user)
+        {
+            RemoveParticipant(user);
+            string url = "RemoveUser";
+            IJson data = new GroupDto
+            {
+                GroupID = GroupID,
+                Participants = new List<User> { user }
+            };
+            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                GroupID = 0;
+                return;
+            }
+            StateHasChanged();
+        }
     }
 }
