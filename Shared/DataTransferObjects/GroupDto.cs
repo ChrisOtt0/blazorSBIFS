@@ -10,7 +10,5 @@ namespace blazorSBIFS.Shared.DataTransferObjects
     public class GroupDto : IJson
     {
         public int GroupID { get; set; }
-        public string Name { get; set; }
-        public List<User> Participants { get; set; }
     }
 }

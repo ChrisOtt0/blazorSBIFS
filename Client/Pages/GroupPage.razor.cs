@@ -78,7 +78,9 @@ namespace blazorSBIFS.Client.Pages
         public void SaveChanges() //Add participants method is not implemented yet into the .razor file
         {
             string url = "Update";
-            IJson data = new GroupDto
+            /* Creating a new GroupDto object and setting the GroupID, Name, and Participants to the GroupID, Group.Name,
+            and Group.Participants. */
+            IJson data = new Group
             {
                 GroupID = GroupID,
                 Name = Group.Name,
@@ -95,7 +97,7 @@ namespace blazorSBIFS.Client.Pages
         public void ReadGroupData()
         {
             string url = "ReadOne";
-            IJson data = new GroupDto
+            IJson data = new Group
             {
                 GroupID = GroupID
             };
@@ -117,7 +119,7 @@ namespace blazorSBIFS.Client.Pages
         public void OwnerDeletesGroup()
         {
             string url = "Delete";
-            IJson data = new GroupDto
+            IJson data = new Group
             {
                 GroupID = GroupID
             };
@@ -134,7 +136,7 @@ namespace blazorSBIFS.Client.Pages
         {
             RemoveParticipant(user);
             string url = "RemoveUser";
-            IJson data = new GroupDto
+            IJson data = new Group
             {
                 GroupID = GroupID,
                 Participants = new List<User> { user }
@@ -153,7 +155,7 @@ namespace blazorSBIFS.Client.Pages
         {
             AddParticipant(user);
             string url = "InviteUser";
-            IJson data = new GroupDto
+            IJson data = new Group
             {
                 GroupID = GroupID,
                 Participants = new List<User> { user }
