@@ -1,10 +1,11 @@
 ﻿using blazorSBIFS.Shared.Models;
 using System.Net.Http.Json;
+using blazorSBIFS.Shared.DataTransferObjects;
 
 namespace blazorSBIFS.Client.Pages
 {
-	public partial class GroupsPage
-	{
+    public partial class GroupsPage
+    {
         string baseUrl = "Group/";
 
         public List<Group> Groups { get; set; } = new List<Group>();

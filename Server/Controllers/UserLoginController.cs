@@ -60,7 +60,7 @@ namespace blazorSBIFS.Server.Controllers
             var login = await _context.UserLogins.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (login == null)
                 return Unauthorized("Wrong username or password.");
-
+            
             string salt = new SaltAdapter().GetSalt();
             string hashedPass = SecurityTools.HashString(request.Password, salt);
 
@@ -73,6 +73,7 @@ namespace blazorSBIFS.Server.Controllers
 
             var jwt = JwtTools.CreateToken(user);
             return Ok(new { jwt });
+            
         }
     }
 }

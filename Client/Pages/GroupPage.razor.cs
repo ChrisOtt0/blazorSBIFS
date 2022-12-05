@@ -60,7 +60,7 @@ namespace blazorSBIFS.Client.Pages
             Group.Participants.Add(user);
             StateHasChanged();
         }
-        /*public void SaveChanges() //Add participants method is not implemented yet into the .razor file
+        public void SaveChanges() //Add participants method is not implemented yet into the .razor file
         {
             string url = "Update";
             IJson data = new GroupDto
@@ -75,6 +75,7 @@ namespace blazorSBIFS.Client.Pages
                 GroupID = 0;
                 return;
             }
-            UpdateName(); */
+            UpdateName();
     }
+}
 }
