@@ -242,6 +242,9 @@ namespace blazorSBIFS.Server.Controllers
             if (group == null)
                 return BadRequest("No such group.");
 
+            if (group.OwnerID != userID)
+                return Unauthorized("Only the group owner can delete the group");
+
             _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
 
