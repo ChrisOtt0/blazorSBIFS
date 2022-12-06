@@ -16,6 +16,8 @@ namespace blazorSBIFS.Client.Pages
         public string GroupName { get; set; } = "not found.";
         public Group? Group { get; set; }
         
+        public string Email { get; set; }    
+        
         protected override async void OnInitialized()
         {
             if (_token.Jwt == string.Empty) _nav.NavigateTo("login");
@@ -154,7 +156,7 @@ namespace blazorSBIFS.Client.Pages
                 },
                 EmailRequest = new EmailDto()
                 {
-                    Email = user.Email
+                    Email = Email
                     
                 }
             };
