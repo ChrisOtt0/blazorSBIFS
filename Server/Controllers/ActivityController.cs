@@ -75,13 +75,41 @@ namespace blazorSBIFS.Server.Controllers
         {
             var activity = await _context.Activities
                 .Where(a => a.ActivityID == request.ActivityID)
-                .Include(a => a.Group)
+                .Include(a => a.Group).ThenInclude(a => a.Participants)
                 .Include(a => a.Participants)
                 .FirstOrDefaultAsync();
             if (activity == null)
                 return BadRequest("No such activity");
 
-            activity = request;
+            // Update Description
+            if (activity.Description != request.Description)
+                activity.Description = request.Description;
+
+            // Update Participants
+            List<User> participants = activity.Group.Participants;
+            foreach (User p in participants)
+            {
+                User? participant = request.Participants.SingleOrDefault(u => u.UserID == p.UserID);
+                if (participant == null && activity.Participants.Contains(p))
+                    activity.Participants.Remove(p);
+                    
+            }
+
+            foreach (User participant in request.Participants)
+            {
+                User? p = activity.Participants.SingleOrDefault(u => u.UserID == participant.UserID);
+                if (p == null)
+                {
+                    p = await _context.Users
+                        .FindAsync(participant.UserID);
+                }
+                    activity.Participants.Add(p);
+            }
+
+            // Update amount
+            if (activity.Amount != request.Amount)
+                activity.Amount = request.Amount;
+
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -96,9 +124,6 @@ namespace blazorSBIFS.Server.Controllers
                 .FirstOrDefaultAsync();
             if (activity == null)
                 return BadRequest("No such activity.");
-
-            if (activity.OwnerID != userID && activity.Group.OwnerID != userID)
-                return BadRequest("Only the activity owner or the group owner can delete an activity.");
 
             _context.Activities.Remove(activity);
             await _context.SaveChangesAsync();

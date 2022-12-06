@@ -69,6 +69,7 @@ namespace blazorSBIFS.Server.Controllers
             var group = await _context.Groups
                 .Where(g => g.GroupID == request.GroupID)
                 .Include(g => g.Participants)
+                .Include(g => g.Activities)
                 .FirstOrDefaultAsync();
             if (group == null)
                 return BadRequest("No such group.");
@@ -88,6 +89,7 @@ namespace blazorSBIFS.Server.Controllers
             var group = await _context.Groups
                 .Where(g => g.GroupID == request.GroupRequest.GroupID)
                 .Include(g => g.Participants)
+                .Include(g => g.Activities)
                 .FirstOrDefaultAsync();
             if (group == null)
                 return BadRequest("No such group.");
@@ -118,6 +120,7 @@ namespace blazorSBIFS.Server.Controllers
             var group = await _context.Groups
                 .Where(g => g.GroupID == request.GroupRequest.GroupID)
                 .Include(g => g.Participants)
+                .Include(g => g.Activities)
                 .FirstOrDefaultAsync();
             if (group == null)
                 return BadRequest("No such group.");

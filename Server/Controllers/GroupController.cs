@@ -65,7 +65,7 @@ namespace blazorSBIFS.Server.Controllers
             var participants = await _context.Groups
                 .Where(g => g.GroupID == request.GroupID)
                 .Select(g => g.Participants)
-                .ToListAsync();
+                .FirstOrDefaultAsync();
 
             return Ok(participants);
         }
@@ -175,6 +175,7 @@ namespace blazorSBIFS.Server.Controllers
             var group = await _context.Groups
                 .Where(g => g.GroupID == request.GroupRequest.GroupID)
                 .Include(g => g.Participants)
+                .Include(g => g.Activities)
                 .FirstOrDefaultAsync();
             if (group == null)
                 return BadRequest("No such group.");
