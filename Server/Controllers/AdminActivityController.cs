@@ -20,7 +20,7 @@ namespace blazorSBIFS.Server.Controllers
         public async Task<ActionResult<List<Activity>>> Create(GroupUserDto request)
         {
             var user = await _context.UserLogins
-                .Where(u => u.Email == request.UserRequest.Email)
+                .Where(u => u.UserID == request.UserRequest.UserID)
                 .Select(u => u.User)
                 .FirstOrDefaultAsync();
             if (user == null)
