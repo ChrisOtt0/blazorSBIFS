@@ -15,7 +15,13 @@ namespace blazorSBIFS.Client.Pages
         public int GroupID { get; set; }
         public string GroupName { get; set; } = "not found.";
         public Group? Group { get; set; }
-        
+
+        /// <summary>
+        /// It gets the group from the database and sets the GroupName to the group's name
+        /// </summary>
+        /// <returns>
+        /// A Group object.
+        /// </returns>
         protected override async void OnInitialized()
         {
             if (_token.Jwt == string.Empty) _nav.NavigateTo("login");
@@ -57,19 +63,24 @@ namespace blazorSBIFS.Client.Pages
             Group.Participants.Remove(user);
             StateHasChanged();
         }
-        public void AddParticipant(User user)
+        public void AddParticipant(User user) //Add participants method is not implemented yet into the .razor file
         {
             Group.Participants.Add(user);
             StateHasChanged();
         }
-        public void UpdateGroup()
+        /// <summary>
+        /// The function is called when the user clicks the save button. It sends a post request to the server with the
+        /// group's name and participants. If the request is successful, the group's name is updated
+        /// </summary>
+        /// <returns>
+        /// The method returns a list of all the groups that the user is a part of.
+        /// </returns>
+        public void SaveChanges() //Add participants method is not implemented yet into the .razor file
         {
             string url = "Update";
-            IJson data = new Group
+            IJson data = new GroupDto
             {
                 GroupID = GroupID,
-                Name = Group.Name,
-                Participants = Group.Participants
             };
             HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
@@ -82,11 +93,11 @@ namespace blazorSBIFS.Client.Pages
         public void ReadGroupData()
         {
             string url = "ReadOne";
-            IJson data = new GroupDto()
+            IJson data = new GroupDto
             {
                 GroupID = GroupID
             };
-            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
+            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
             {
                 GroupID = 0;
@@ -104,7 +115,7 @@ namespace blazorSBIFS.Client.Pages
         public void OwnerDeletesGroup()
         {
             string url = "Delete";
-            IJson data = new GroupDto()
+            IJson data = new GroupDto
             {
                 GroupID = GroupID
             };
@@ -120,19 +131,12 @@ namespace blazorSBIFS.Client.Pages
         public void OwnerRemovesUser(User user)
         {
             RemoveParticipant(user);
-            string url = "RemoveParticipant";
-            IJson data = new GroupUserDto()
+            string url = "RemoveUser";
+            IJson data = new GroupDto
             {
-                GroupRequest = new GroupDto()
-                {
-                    GroupID = GroupID
-                },
-                UserRequest = new EmailDto()
-                {
-                    Email = user.Email
-                }
+                GroupID = GroupID,
             };
-            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
+            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
             {
                 string error = response.Content.ReadAsStringAsync().Result;
@@ -145,17 +149,10 @@ namespace blazorSBIFS.Client.Pages
         public void OwnerInvitesUsers(User user) //
         {
             AddParticipant(user);
-            string url = "AddParticipant";
-            IJson data = new GroupUserDto()
+            string url = "InviteUser";
+            IJson data = new GroupDto
             {
-                GroupRequest = new GroupDto()
-                {
-                    GroupID = GroupID
-                },
-                UserRequest = new EmailDto()
-                {
-                    Email = user.Email
-                }
+                GroupID = GroupID,
             };
             HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
             if (!response.IsSuccessStatusCode)
