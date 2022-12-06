@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using blazorSBIFS.Server.Tools;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -239,10 +240,10 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpDelete("Delete"), Authorize(Roles = "admin, user")]
-        public async Task<ActionResult> Delete(GroupDto requested)
+        public async Task<ActionResult> Delete(GroupDto request)
         {
             int userID = _userService.GetUserID();
-            Group? group = await _context.Groups.FirstOrDefaultAsync(g => g.GroupID == requested.GroupID && g.OwnerID == userID);
+            Group? group = await _context.Groups.FirstOrDefaultAsync(g => g.GroupID == request.GroupID && g.OwnerID == userID);
             if (group == null)
                 return BadRequest("No such group.");
 
@@ -282,6 +283,118 @@ namespace blazorSBIFS.Server.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPost("Calculate"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<CalculationDto>> Calculate(GroupDto request)
+        {
+            Group? group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupID)
+                .Include(g => g.Participants)
+                .Include(g => g.Activities).ThenInclude(a => a.Participants)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group");
+            List<User> participants = group.Participants;
+            List<Activity> activities = group.Activities;
+            double[,] graph = new double[participants.Count,participants.Count];
+
+            // Creating references for the graph
+            Dictionary<User, int> userReference = new Dictionary<User, int>();
+            for (int i = 0; i < participants.Count; i++)
+            {
+                userReference.Add(participants[i], i);
+            }
+            
+            // Filling graph with values
+            foreach (Activity activity in activities)
+            {
+                double amount = Math.Round(((double)activity.Amount / activity.Participants.Count), 2, MidpointRounding.AwayFromZero);
+                foreach (User user in activity.Participants)
+                {
+                    int keyReceiver = userReference.Where(u => u.Key.UserID == activity.OwnerID).FirstOrDefault().Value;
+                    int keyPayer = userReference[user];
+
+                    if (keyReceiver == keyPayer) continue;
+
+                    graph[keyReceiver, keyPayer] += amount;
+                }
+            }
+
+            // Simplify Graph
+            GraphTools.SimplifyGraph(ref graph);
+
+            return Ok(new CalculationDto { Results = await ResultsFromGraph(graph, userReference) });
+        }
+
+        private async Task<string> ResultsFromGraph(double[,] graph, Dictionary<User, int> reference)
+        {
+            string results = "";
+            Dictionary<int, User> revReference = new Dictionary<int, User>();
+            foreach (KeyValuePair<User, int> kvp in reference)
+                revReference.Add(kvp.Value, kvp.Key);
+
+            // go through each reference
+            // User with name and email owes User with name and email & User with name and email receives from User with name and email:
+            // Owes bool to keep track if owes or not, reset upon new reference
+            foreach (KeyValuePair<User, int> kvp in reference)
+            {
+                bool owes = false;
+                bool isOwed = false;
+
+                results += "// User: " + kvp.Key.Name
+                    + "\t - " + _context.UserLogins.
+                        Where(u => u.UserID == kvp.Key.UserID)
+                        .FirstAsync().Result.Email
+                    + "//\n";
+
+                // Add what the user owes
+                results += "Owes:\n";
+                for (int i = 0; i < graph.GetLength(0); i++)
+                {
+                    if (graph[i, kvp.Value] == 0.0 || i == kvp.Value) continue;
+                    User receiver = revReference[i];
+                    UserLogin? receiverLogin = await _context.UserLogins.Where(u => u.UserID == receiver.UserID).FirstOrDefaultAsync();
+                    if (receiverLogin == null)
+                        return "Error in db";
+
+                    results += graph[i, kvp.Value]
+                        + ",- to: " + receiver.Name
+                        + " - " + receiverLogin.Email
+                        + "\n";
+
+                    if (!owes)
+                        owes = true;
+                }
+
+                if (!owes)
+                    results += "Nothing.\n\n";
+
+                // Add what the user is owed
+                results += "Is owed:\n";
+                for (int i = 0; i < graph.GetLength(1); i++)
+                {
+                    if (graph[kvp.Value, i] == 0.0 || i == kvp.Value) continue;
+                    User receiver = revReference[i];
+                    UserLogin? receiverLogin = await _context.UserLogins.Where(u => u.UserID == receiver.UserID).FirstOrDefaultAsync();
+                    if (receiverLogin == null)
+                        return "Error in db";
+
+                    results += graph[kvp.Value, i]
+                        + ",- from: " + receiver.Name
+                        + " - " + receiverLogin.Email
+                        + "\n";
+
+                    if (!isOwed)
+                        isOwed = true;
+                }
+
+                if (!isOwed)
+                    results += "Nothing.\n\n\n";
+                else { results += "\n\n\n"; }
+            }
+
+            return results;
         }
     }
 }

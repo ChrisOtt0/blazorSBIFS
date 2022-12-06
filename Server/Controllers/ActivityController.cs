@@ -78,42 +78,38 @@ namespace blazorSBIFS.Server.Controllers
         {
             Activity? activity = await _context.Activities
                 .Where(a => a.ActivityID == request.ActivityID)
-                .Include(a => a.Group).ThenInclude(a => a.Participants)
+                .Include(a => a.Group).ThenInclude(g => g.Participants)
                 .Include(a => a.Participants)
                 .FirstOrDefaultAsync();
             if (activity == null)
                 return BadRequest("No such activity");
 
-            // Update Description
-            if (activity.Description != request.Description)
-                activity.Description = request.Description;
+            // Updates all scalary information.
+            var entry = _context.Entry(activity);
+            entry.CurrentValues.SetValues(request);
 
             // Update Participants
-            List<User> participants = activity.Group.Participants;
+            List<User> participants = activity.Group.Participants.ToList();
+
             foreach (User p in participants)
             {
                 User? participant = request.Participants.SingleOrDefault(u => u.UserID == p.UserID);
                 if (participant == null && activity.Participants.Contains(p))
-                    activity.Participants.Remove(p);
-                    
+                    entry.Entity.Participants.Remove(await _context.Users.FindAsync(p.UserID));
             }
 
             foreach (User participant in request.Participants)
             {
                 User? p = activity.Participants.SingleOrDefault(u => u.UserID == participant.UserID);
-                if (p == null && participants.Contains(participant))
+                if (p == null)
                 {
                     p = await _context.Users
                         .FindAsync(participant.UserID);
                     if (p == null)
                         continue;
                 }
-                activity.Participants.Add(p);
+                entry.Entity.Participants.Add(await _context.Users.FindAsync(p.UserID));
             }
-
-            // Update amount
-            if (activity.Amount != request.Amount)
-                activity.Amount = request.Amount;
 
             await _context.SaveChangesAsync();
             return NoContent();
