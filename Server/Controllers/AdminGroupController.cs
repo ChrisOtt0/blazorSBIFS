@@ -80,9 +80,9 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpPut("AddParticipant"), Authorize(Roles = "admin")]
-        public async Task<ActionResult<Group>> AddParticipant(GroupUserDto request)
+        public async Task<ActionResult<Group>> AddParticipant(GroupEmailDto request)
         {
-            if (request.GroupRequest == null || request.UserRequest == null)
+            if (request.GroupRequest == null || request.EmailRequest == null)
                 return BadRequest("Request incomplete.");
 
             int userID = _userService.GetUserID();
@@ -95,7 +95,7 @@ namespace blazorSBIFS.Server.Controllers
                 return BadRequest("No such group.");
 
             var participant = await _context.UserLogins
-                .Where(u => u.Email == request.UserRequest.Email)
+                .Where(u => u.Email == request.EmailRequest.Email)
                 .Include(u => u.User)
                 .FirstOrDefaultAsync();
             if (participant == null)
@@ -126,7 +126,7 @@ namespace blazorSBIFS.Server.Controllers
                 return BadRequest("No such group.");
 
             var participant = await _context.UserLogins
-                .Where(u => u.Email == request.UserRequest.Email)
+                .Where(u => u.UserID == request.UserRequest.UserID)
                 .Include(u => u.User)
                 .FirstOrDefaultAsync();
             if (participant == null)

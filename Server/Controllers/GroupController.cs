@@ -37,7 +37,6 @@ namespace blazorSBIFS.Server.Controllers
         public async Task<ActionResult<List<Group>>> ReadMany()
         {
             int userID = _userService.GetUserID();
-            // Necessity for a group name which is returned instead? 
             List<Group> groups = await _context.Groups
                 .Where(g => g.OwnerID == userID)
                 .Include(g => g.Participants)
@@ -166,9 +165,9 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpPut("AddParticipant"), Authorize(Roles = "admin, user")]
-        public async Task<ActionResult<Group>> AddParticipant(GroupUserDto request)
+        public async Task<ActionResult<Group>> AddParticipant(GroupEmailDto request)
         {
-            if (request.GroupRequest == null || request.UserRequest == null)
+            if (request.GroupRequest == null || request.EmailRequest == null)
                 return BadRequest("Request incomplete.");
 
             int userID = _userService.GetUserID();
@@ -184,7 +183,7 @@ namespace blazorSBIFS.Server.Controllers
                 return Unauthorized("Only the group owner can invite participants.");
 
             var participant = await _context.UserLogins
-                .Where(u => u.Email == request.UserRequest.Email)
+                .Where(u => u.Email == request.EmailRequest.Email)
                 .Include(u => u.User)
                 .FirstOrDefaultAsync();
             if (participant == null)
@@ -217,7 +216,7 @@ namespace blazorSBIFS.Server.Controllers
                 return Unauthorized("Only the group owner can remove participants.");
 
             var participant = await _context.UserLogins
-                .Where(u => u.Email == request.UserRequest.Email)
+                .Where(u => u.UserID == request.UserRequest.UserID)
                 .Include(u => u.User)
                 .FirstOrDefaultAsync();
             if (participant == null)
