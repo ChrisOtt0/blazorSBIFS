@@ -108,17 +108,17 @@ namespace blazorSBIFS.Server.Controllers
 
             // Update Participants
             List<User> users = group.Participants.ToList();
-            foreach (User u in users)
+            foreach (User user in users)
             {
-                User? participant = request.Participants.SingleOrDefault(r => r.UserID == u.UserID);
+                User? participant = request.Participants.SingleOrDefault(r => r.UserID == user.UserID);
                 if (participant == null)
-                    group.Participants.Remove(u);
+                    group.Participants.Remove(user);
             }
 
             foreach (User participant in request.Participants)
             {
-                User? u = group.Participants.SingleOrDefault(u => u.UserID == participant.UserID);
-                if (u == null)
+                User? user = group.Participants.SingleOrDefault(u => u.UserID == participant.UserID);
+                if (user == null)
                     group.Participants.Add(participant);
             }
 
