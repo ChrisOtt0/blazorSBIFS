@@ -64,7 +64,7 @@ namespace blazorSBIFS.Client.Pages
         }
         public void UpdateGroup()
         {
-            string url = "Update";
+            string url = "UpdateGroup";
             IJson data = new Group
             {
                 GroupID = GroupID,
@@ -142,7 +142,7 @@ namespace blazorSBIFS.Client.Pages
             StateHasChanged();
         }
 
-        public void OwnerInvitesUsers(User user) //
+        public void OwnerAddsUsers(User user) //
         {
             AddParticipant(user);
             string url = "AddParticipant";
@@ -167,5 +167,94 @@ namespace blazorSBIFS.Client.Pages
             }
             StateHasChanged();
         }
+        public void UserLeavesGroup() //Method that allows a user to leave the group, if they are not the owner.
+        {
+            string url = "LeaveGroup";
+            IJson data = new GroupDto()
+            {
+                GroupID = GroupID
+            };
+            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                GroupID = 0;
+                return;
+            }
+            _nav.NavigateTo("groups");
+        }
+
+        public void UserDeletesActivity(Activity activity)
+        {
+            string url = "Delete";
+            IJson data = new ActivityDto()
+            {
+                ActivityID = activity.ActivityID
+            };
+            HttpResponseMessage response = _http.Delete(url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                GroupID = 0;
+                return;
+            }
+            ReadGroupData();
+        }
+        public void UserEditsActivity(Activity activity)
+        {
+            string url = "UpdateActivity";
+            IJson data = new Activity()
+            {
+                ActivityID = activity.ActivityID,
+                Group = activity.Group,
+                Amount = activity.Amount,
+                Description = activity.Description,
+            };
+            HttpResponseMessage response = _http.Put(url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                GroupID = 0;
+                return;
+            }
+            ReadGroupData();
+        }
+        public void UserAddsActivity(Activity activity)
+        {
+            string url = "Create";
+            IJson data = new GroupDto()
+            {
+                GroupID = GroupID
+            };
+            HttpResponseMessage response = _http.Post(url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                GroupID = 0;
+                return;
+            }
+            ReadGroupData();
+        }
     }
 }
+
+/*public void OwnerInvitesUsers(User user)
+{
+    AddParticipant(user);
+    string url = "AddParticipant";
+    IJson data = new GroupUserDto()
+    {
+        GroupRequest = new GroupDto()
+        {
+            GroupID = GroupID
+        },
+        UserRequest = new UserDto()
+        {
+            UserID = user.UserID
+        }
+    };
+    HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
+    if (!response.IsSuccessStatusCode)
+    {
+        string error = response.Content.ReadAsStringAsync().Result;
+        Console.WriteLine(error);
+        return;
+    }
+    StateHasChanged();
+}*/

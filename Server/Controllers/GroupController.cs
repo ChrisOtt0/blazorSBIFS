@@ -254,5 +254,34 @@ namespace blazorSBIFS.Server.Controllers
 
             return NoContent();
         }
+        [HttpPut("LeaveGroup"), Authorize(Roles = "admin, user")] //Leave group as participant (not owner)
+        public async Task<ActionResult> LeaveGroup(GroupDto requested)
+        {
+            int userID = _userService.GetUserID();
+            Group? group = await _context.Groups
+                .Where(g => g.GroupID == requested.GroupID)
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group.");
+
+            if (group.OwnerID == userID)
+                return Unauthorized("The owner of the group cannot leave the group.");
+
+            User? user = await _context.UserLogins
+                .Where(u => u.UserID == userID)
+                .Select(u => u.User)
+                .FirstOrDefaultAsync();
+            if (user == null)
+                return BadRequest("No such user.");
+
+            if (!group.Participants.Contains(user))
+                return BadRequest("User is not a participant in the selected group.");
+
+            group.Participants.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace blazorSBIFS.Shared.DataTransferObjects
 {
-    public class ActivityDto
+    public class ActivityDto : IJson
     {
         public int ActivityID { get; set; }
     }
