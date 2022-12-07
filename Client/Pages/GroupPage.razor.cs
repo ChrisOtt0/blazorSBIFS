@@ -265,28 +265,3 @@ namespace blazorSBIFS.Client.Pages
         }
     }
 }
-
-/*public void OwnerInvitesUsers(User user)
-{
-    AddParticipant(user);
-    string url = "AddParticipant";
-    IJson data = new GroupUserDto()
-    {
-        GroupRequest = new GroupDto()
-        {
-            GroupID = GroupID
-        },
-        UserRequest = new UserDto()
-        {
-            UserID = user.UserID
-        }
-    };
-    HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
-    if (!response.IsSuccessStatusCode)
-    {
-        string error = response.Content.ReadAsStringAsync().Result;
-        Console.WriteLine(error);
-        return;
-    }
-    StateHasChanged();
-}*/
