@@ -251,6 +251,16 @@ namespace blazorSBIFS.Server.Controllers
             if (group.OwnerID != userID)
                 return Unauthorized("Only the group owner can delete the group");
 
+            List<Activity>? activities = await _context.Activities
+                .Where(a => a.Group == group).ToListAsync();
+            if (activities != null && activities.Any())
+            {
+                foreach (Activity activity in activities)
+                {
+                    _context.Activities.Remove(activity);
+                }
+            }
+
             _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
 
