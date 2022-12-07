@@ -36,7 +36,6 @@ namespace blazorSBIFS.Server.Controllers
             User? user = await _context.UserLogins
                 .Where(l => l.Email == request.Email)
                 .Select(l => l.User)
-                .Include(u => u.Groups)
                 .FirstAsync();
             if (user == null)
                 return BadRequest("No such user.");
@@ -44,7 +43,8 @@ namespace blazorSBIFS.Server.Controllers
             Group group = new Group();
             group.Name = "New Group";
             group.OwnerID = user.UserID;
-            user.Groups.Add(group);
+            var entry = _context.Entry(user);
+            entry.Entity.Groups.Add(group);
             group.Participants.Add(user);
 
             await _context.Groups.AddAsync(group);
@@ -143,6 +143,15 @@ namespace blazorSBIFS.Server.Controllers
             if (group == null)
                 return BadRequest("No such group.");
 
+            List<Activity>? activities = await _context.Activities
+                .Where(a => a.Group == group).ToListAsync();
+            if (activities != null && activities.Any())
+            {
+                foreach (Activity activity in activities)
+                {
+                    _context.Activities.Remove(activity);
+                }
+            }
             _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
 
