@@ -6,17 +6,14 @@
 
 <PageTitle>Group @GroupName</PageTitle>
 
-<h3>Group @GroupName</h3>
-
-@if (Group == null) {
-	<div>
-		<h4>Group not found</h4>
-	</div>
-} else {
-	<!-- Add group content for editing here -->
-	<div class="column-10">
+<div class="content-div">
+	<h1>Group @GroupName</h1>
+	<br/>
+	@if (Group == null) {
+		<h3>Group not found</h3>
+	} else {
 		<div>
-			<input type="text" @bind-value="Group.Name" class="form-control"/>
+			<input type="text" @bind-value="Group.Name" class="form-control form-input-float"/>
 			<br />
 			<button class="btn btn-primary" @onclick="@(() => UpdateName())">Update</button>
 		</div>
@@ -32,6 +29,7 @@
 			}
 		</div>
 		<br />
-	</div>
-}
+	}
+</div>
+
 

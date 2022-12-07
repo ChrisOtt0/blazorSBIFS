@@ -6,11 +6,15 @@
 <PageTitle>Groups</PageTitle>
 
 <div class="col-12">
-	<div class="col-10">
-		@foreach (Group group in Groups) {
-			<a href="/group/@group.GroupID" class="list-group-item list-group-item-action flex-column align-items-start">
-				@group.Name <span> </span></a>
-		}
+	<div class="content-div">
+		<h1>Groups</h1>
+		<br/>
+		<div class="list-div">
+			@foreach (Group group in Groups) {
+				<a href="/group/@group.GroupID" class="list-group-item list-group-item-action flex-column align-items-start list-link">
+					@group.Name <span> </span></a>
+			}
+		</div>
 		<br />
 		<button class="btn btn-primary" @onclick="NewGroup">New Group</button>
 	</div>

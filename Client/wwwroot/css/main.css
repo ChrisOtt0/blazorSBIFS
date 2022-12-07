@@ -122,7 +122,27 @@ h1 {
     margin: 20px 20px 20px 20px;
 }
 
+.list-div {
+    margin: 0 5px 0 5px;
+    min-width: 200px;
+    max-width: 400px;
+}
+
+.list-link {
+    color: var(--bs-gray-700);
+    border: 2px solid var(--bs-gray-500);
+    box-shadow: 1px 1px 2px 1px var(--bs-gray-500);
+}
+
+    .list-link:hover {
+        color: #e65c00;
+    }
+
 .form-input {
     min-width: 200px;
     max-width: 400px;
+}
+
+.form-input-float {
+
 }
