@@ -15,11 +15,11 @@ namespace blazorSBIFS.Client.Pages
         public int GroupID { get; set; }
         public string GroupName { get; set; } = "not found.";
         public Group? Group { get; set; }
-        
-        public string Email { get; set; }    
+        public string Email { get; set; }
         
         protected override async void OnInitialized()
         {
+            base.OnInitialized();
             if (_token.Jwt == string.Empty) _nav.NavigateTo("login");
 
             string url = "ReadOne";
