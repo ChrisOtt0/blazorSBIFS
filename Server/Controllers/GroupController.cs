@@ -1,4 +1,5 @@
-﻿using blazorSBIFS.Server.Tools;
+﻿using Azure.Core;
+using blazorSBIFS.Server.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -256,11 +257,11 @@ namespace blazorSBIFS.Server.Controllers
             return NoContent();
         }
         [HttpPut("LeaveGroup"), Authorize(Roles = "admin, user")] //Leave group as participant (not owner)
-        public async Task<ActionResult> LeaveGroup(GroupDto requested)
+        public async Task<ActionResult> LeaveGroup(GroupDto request)
         {
             int userID = _userService.GetUserID();
             Group? group = await _context.Groups
-                .Where(g => g.GroupID == requested.GroupID)
+                .Where(g => g.GroupID == request.GroupID)
                 .Include(g => g.Participants)
                 .FirstOrDefaultAsync();
             if (group == null)
@@ -278,6 +279,21 @@ namespace blazorSBIFS.Server.Controllers
 
             if (!group.Participants.Contains(user))
                 return BadRequest("User is not a participant in the selected group.");
+
+            // Remove user from activities in the group.
+            List<Activity>? activities = await _context.Groups
+                .Where(g => g.GroupID == request.GroupID)
+                .Select(g => g.Activities)
+                .FirstOrDefaultAsync();
+            if (activities != null)
+            {
+                foreach (Activity activity in activities)
+                {
+                    var activityEntry = _context.Entry(activity);
+                    if (activityEntry.Entity.Participants != null && activityEntry.Entity.Participants.Contains(user))
+                        activityEntry.Entity.Participants.Remove(user);
+                }
+            }
 
             group.Participants.Remove(user);
             await _context.SaveChangesAsync();
