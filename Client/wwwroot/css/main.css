@@ -1,11 +1,76 @@
 ﻿@import url('bootstrap/bootstrap.min.css');
 
+html, body {
+    font-family: 'Cascadia Mono';
+}
+
 .main-div {
     height: 100%;
 }
 
+.btn-primary {
+    color: var(--bs-gray-300);
+    background-color: var(--bs-gray-700);
+    border-color: var(--bs-gray-600);
+}
+
+    .btn-primary:hover {
+        color: var(--bs-gray-800);
+        background-color: #e65c00;
+        border-color: #e65c00;
+        box-shadow: 1px 1px 2px 1px var(--bs-gray-500);
+    }
+
+    .btn-primary:focus {
+        color: var(--bs-gray-200);
+        background-color: var(--bs-gray-800);
+        border-color: var(--bs-gray-700);
+        box-shadow: 1px 1px 2px 1px var(--bs-gray-500);
+    }
+
+.btn-danger {
+    color: var(--bs-gray-300);
+    background-color: #b30000;
+    border-color: #b30000;
+}
+
+    .btn-danger:hover {
+        color: var(--bs-gray-800);
+        background-color: #ff5c00;
+        border-color: #ff5c00;
+        box-shadow: 1px 1px 2px 1px var(--bs-gray-500);
+    }
+
+    .btn-danger:focus {
+        color: var(--bs-gray-300);
+        background-color: #b30000;
+        border-color: #b30000;
+        box-shadow: 1px 1px 2px 1px var(--bs-gray-500);
+    }
+
+.form-control:focus {
+    outline: none;
+    box-shadow: 1px 1px 2px 1px var(--bs-gray-500);
+    border-color: var(--bs-gray-600);
+}
+
+a {
+    padding: 4px;
+    text-decoration: none;
+}
+
+    a:hover {
+        color: #e65c00;
+    }
+
+    a:focus {
+        outline: 0 solid var(--bs-gray-600);
+        text-decoration: underline;
+    }
+
 h1 {
     margin: 20px, 4px, 4px, 4px;
+    font-weight: 600;
 }
 
 .center {
@@ -19,11 +84,45 @@ h1 {
     position: relative;
     top: 50%;
     -ms-transform: translateY(-50%);
-    transform: translateY(20%);
+    transform: translateY(0%);
 }
 
 .centered-input {
     max-width: 500px;
     margin: auto;
     display: block;
+}
+
+.home-link {
+    font-size: 24px;
+    color: var(--bs-gray-100);
+    text-align: center;
+}
+
+.header-link {
+    color: var(--bs-gray-100);
+}
+
+.form-link {
+    color: #e65c00;
+}
+
+.main-logo {
+    max-width: 30%;
+    min-width: 200px;
+    height: auto;
+    margin: 2px 20px 20px 2px;
+}
+
+.feedback-label {
+    color: var(--bs-gray-700);
+}
+
+.content-div {
+    margin: 20px 20px 20px 20px;
+}
+
+.form-input {
+    min-width: 200px;
+    max-width: 400px;
 }

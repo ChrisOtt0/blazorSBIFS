@@ -7,8 +7,7 @@
 
 <div class="col-12 main-div">
 	<div class="center col-6">
-		<br />
-		<br />
+		<img class="main-logo" src="images/sbifs.png"/>
 		<h1>Register</h1>
 		<br />
 		<input type="text" @bind-value="Name" class="form-control centered-input" placeholder="Name.." />
@@ -20,11 +19,10 @@
 		<input type="password" @bind-value="ConfirmPassword" class="form-control centered-input" placeholder="Confirm password.." />
 		<br />
 		<button class="btn btn-primary" @onclick="Submit">Submit</button>
-		<span>&nbsp;&nbsp;</span>
-		<a href="/login">Login</a>
+		Already have an account? <a class="form-link" href="/login">Login</a>
 		<br/>
 		<br/>
-		<span>&nbsp;&nbsp;</span>@Message
+		<p class="feedback-label">@Message</p>
 	</div>
 </div>
 

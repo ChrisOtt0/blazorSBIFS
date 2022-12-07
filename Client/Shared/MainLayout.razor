@@ -11,11 +11,9 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-
             @if (IsLoggedIn()) {
                 <span>&nbsp;&nbsp;</span>
-                <a href="/login" @onclick="Logout">Logout</a>
+                <a class="header-link" href="/login" @onclick="Logout">Logout</a>
             }
         </div>
 

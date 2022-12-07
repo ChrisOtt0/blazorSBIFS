@@ -7,8 +7,7 @@
 
 <div class="col-12 main-div">
 	<div class="center col-6">
-		<br />
-		<br />
+		<img class="main-logo" src="images/sbifs.png"/>
 		<h1>Login</h1>
 		<br />
 		<input type="text" @bind-value="Email" class="form-control centered-input" placeholder="Email.." />
@@ -16,10 +15,9 @@
 		<input type="password" @bind-value="Password" class="form-control centered-input" placeholder="Password.." />
 		<br />
 		<button class="btn btn-primary" @onclick="Login">Login</button>
-		<span>&nbsp;&nbsp;</span>
-		<a href="/register">Register</a>
+		Don't have an account yet? <a class="form-link" href="/register">Register</a>
 		<br />
 		<br />
-		<span>&nbsp;&nbsp;</span>@Message
+		<p class="feedback-label">@Message</p>
 	</div>
 </div>
