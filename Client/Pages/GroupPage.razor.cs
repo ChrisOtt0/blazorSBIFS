@@ -231,6 +231,36 @@ namespace blazorSBIFS.Client.Pages
             }
             ReadGroupData();
         }
+        public void UserReadsActivity(Activity activity)
+        {
+            string url = "ReadOne";
+            IJson data = new ActivityDto()
+            {
+                ActivityID = activity.ActivityID
+            };
+            HttpResponseMessage response = _http.Post(url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                GroupID = 0;
+                return;
+            }
+            ReadGroupData();
+        }
+        public void OwnerReadsAllActivities()
+        {
+            string url = "ReadMany";
+            IJson data = new GroupDto()
+            {
+                GroupID = GroupID
+            };
+            HttpResponseMessage response = _http.Post(url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                GroupID = 0;
+                return;
+            }
+            ReadGroupData();
+        }
     }
 }
 
