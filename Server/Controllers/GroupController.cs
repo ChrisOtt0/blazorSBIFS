@@ -266,6 +266,7 @@ namespace blazorSBIFS.Server.Controllers
 
             return NoContent();
         }
+
         [HttpPut("LeaveGroup"), Authorize(Roles = "admin, user")] //Leave group as participant (not owner)
         public async Task<ActionResult> LeaveGroup(GroupDto request)
         {
