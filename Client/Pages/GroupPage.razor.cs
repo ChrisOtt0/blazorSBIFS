@@ -228,7 +228,8 @@ namespace blazorSBIFS.Client.Pages
 
         public void EditActivity(Activity activity)
         {
-            ActivityMessage = "EditActivity was called";
+            ClearMessages();
+            _nav.NavigateTo($"/activity/{activity.ActivityID}");
         }
 
         public void GoBack()
@@ -333,22 +334,5 @@ namespace blazorSBIFS.Client.Pages
             }
             //ReadGroupData();
         }
-
-        // Method below belongs in ActivityPage
-        //public void UserReadsActivity(Activity activity)
-        //{
-        //    string url = "ReadOne";
-        //    IJson data = new ActivityDto()
-        //    {
-        //        ActivityID = activity.ActivityID
-        //    };
-        //    HttpResponseMessage response = _http.Post(url, data).Result;
-        //    if (!response.IsSuccessStatusCode)
-        //    {
-        //        GroupID = 0;
-        //        return;
-        //    }
-        //    //ReadGroupData();
-        //}
     }
 }

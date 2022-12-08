@@ -11,7 +11,7 @@ namespace blazorSBIFS.Client.Pages
 		string baseUrl = "Activity/";
 
 		[Parameter]
-		public int ActivtyID { get; set; }
+		public int ActivityID { get; set; }
 		public Activity? Activity { get; set; }
 		public List<User>? GroupParticipants { get; set; } = new List<User>();
 		public List<User>? Responsible { get; set; } = new List<User>();
@@ -25,15 +25,15 @@ namespace blazorSBIFS.Client.Pages
 
 			// Read Activity
 			string url = "ReadOne";
-			IJson data = new ActivityDto { ActivityID= ActivtyID };
+			IJson data = new ActivityDto { ActivityID= ActivityID };
 			HttpResponseMessage response = await _http.Post(baseUrl+ url, data);
 			if (!response.IsSuccessStatusCode)
 			{
 				FeedbackLabel = ((int)response.StatusCode).ToString() + ": " + await response.Content.ReadAsStringAsync();
-				this.ActivtyID = 0;
+				this.ActivityID = 0;
 				this.Activity = new Activity
 				{
-					ActivityID = ActivtyID,
+					ActivityID = this.ActivityID,
 					Description = "Not found.",
 					Amount = 0.0,
 				};
@@ -44,10 +44,10 @@ namespace blazorSBIFS.Client.Pages
 			if (Activity == null)
 			{
 				FeedbackLabel = "Error in the API. Please contact a developer.";
-				this.ActivtyID = 0;
+				this.ActivityID = 0;
 				this.Activity = new Activity
 				{
-					ActivityID = ActivtyID,
+					ActivityID = this.ActivityID,
 					Description = "Not found.",
 					Amount = 0.0,
 				};
