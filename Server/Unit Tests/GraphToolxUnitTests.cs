@@ -31,7 +31,6 @@ public class GraphToolxUnitTests
                 }
             }
         }
-
         // Verify that the number of non-zero elements is less than the original matrix
         Assert.True(nonZeroCount < 3);
     }
@@ -45,9 +44,8 @@ public class GraphToolxUnitTests
             { 0 }
         };
 
-        // Simplify the graph
+        // // Act & Assert.
         GraphTools.SimplifyGraph(ref graph);
-
         // Verify that the resulting matrix is the same as the original matrix
         Assert.Equal(graph, new double[,] {
             { 0 }
@@ -65,7 +63,7 @@ public class GraphToolxUnitTests
             { 0, 0, 0 }
         };
 
-        // Simplify the graph
+        // Act & Assert.
         GraphTools.SimplifyGraph(ref graph);
 
         // Verify that the resulting matrix is the same as the original matrix
@@ -77,7 +75,7 @@ public class GraphToolxUnitTests
     }
 
     [Fact]
-    public void SimplifyGraphRemoveEdgesThatShouldNotBeRemoved() //This unit test it is supposed to fail succesfully.
+    public void SimplifyGraphRemoveEdgesThatShouldNotBeRemoved() //This unit test it is intended to fail because if the result equals zero it doesn´t display in the receipt or it display with zero.
     {
         // Create a small graph with some edges
         double[,] graph = new double[3, 3];
@@ -87,7 +85,7 @@ public class GraphToolxUnitTests
             { 2, 3, 0 }
         };
 
-        // Simplify the graph
+        // Act & Assert.
         GraphTools.SimplifyGraph(ref graph);
 
         // Verify that the resulting matrix is the same as the original matrix
@@ -98,7 +96,7 @@ public class GraphToolxUnitTests
         });
     }
     [Fact]
-    public void SimplifyGraphWithEdgesOfVaryingWeights() //This unit test it is supposed to fail.
+    public void SimplifyGraphWithEdgesOfVaryingWeights() //Negative Test meaning it is supposed to fail.
     {
         // Create a small graph with some edges of varying weights
         double[,] graph = new double[3, 3];
@@ -108,7 +106,7 @@ public class GraphToolxUnitTests
             { 5, 6, 0 }
         };
 
-        // Simplify the graph
+        // Act & Assert.
         GraphTools.SimplifyGraph(ref graph);
 
         // Verify that the resulting matrix is as expected
@@ -120,7 +118,7 @@ public class GraphToolxUnitTests
     }
 
     [Fact]
-    public void SimplifyGraphWithDisconnectedComponents() //This unit test it is supposed to fail.
+    public void SimplifyGraphWithDisconnectedComponents() //Negative Test meaning it is supposed to fail.
     {
         // Create a graph with multiple disconnected components
         double[,] graph = new double[4, 4];
@@ -131,10 +129,9 @@ public class GraphToolxUnitTests
             { 0, 0, 2, 0 }
         };
 
-        // Simplify the graph
+        // // Act & Assert.
         GraphTools.SimplifyGraph(ref graph);
-
-        // Verify that the resulting matrix is as expected
+        //Asserting that the graph is not fully connected
         Assert.Equal(graph, new double[,] {
             { 0, 1, 0, 0 },
             { 1, 0, 0, 0 },
