@@ -39,9 +39,19 @@ namespace blazorSBIFS.Server.Controllers
         public async Task<ActionResult<List<Group>>> ReadMany()
         {
             int userID = _userService.GetUserID();
-            List<Group> groups = await _context.Groups
-                .Where(g => g.OwnerID == userID)
+            User? user = await _context.Users
+                .Where(u => u.UserID == userID)
+                .FirstOrDefaultAsync();
+            if (user == null)
+                return BadRequest("No such user.");
+
+            List<Group> allGroups = await _context.Groups
+                .Include(g => g.Participants)
                 .ToListAsync();
+            if (allGroups == null || allGroups.Count == 0)
+                return Ok(null);
+
+            List<Group> groups = allGroups.Where(g => g.Participants.Contains(user)).ToList();
             return Ok(groups);
         }
 
