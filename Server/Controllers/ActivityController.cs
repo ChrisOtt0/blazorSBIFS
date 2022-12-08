@@ -83,6 +83,8 @@ namespace blazorSBIFS.Server.Controllers
                 .FirstOrDefaultAsync();
             if (activity == null)
                 return BadRequest("No such activity");
+            if (activity.Group == null)
+                return BadRequest("Unexpected error - Activity not tied to a Group.");
 
             // Updates all scalary information.
             var entry = _context.Entry(activity);
@@ -125,6 +127,11 @@ namespace blazorSBIFS.Server.Controllers
                 .FirstOrDefaultAsync();
             if (activity == null)
                 return BadRequest("No such activity.");
+            if (activity.Group == null)
+                return BadRequest("Unexpected error - Activity not tied to a Group.");
+
+            if (activity.OwnerID != userID || activity.Group.OwnerID != userID)
+                return Unauthorized("Only activity owners or the group owner can delete an activity");
 
             _context.Activities.Remove(activity);
             await _context.SaveChangesAsync();

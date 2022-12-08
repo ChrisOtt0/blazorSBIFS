@@ -138,10 +138,32 @@ namespace blazorSBIFS.Client.Pages
 				_nav.NavigateTo("/groups");
 		}
 
-		public void Delete()
+		public async void Delete()
 		{
-			FeedbackLabel = "Delete was called";
-			StateHasChanged();
+			if (ActivityID == 0)
+			{
+				FeedbackLabel = "No Activity to delete.";
+				StateHasChanged();
+				return;
+			}
+
+			string url = "Delete";
+			IJson data = new ActivityDto { ActivityID = this.ActivityID };
+
+			HttpResponseMessage response = await _http.Delete(baseUrl + url, data);
+			if (!response.IsSuccessStatusCode)
+			{
+				FeedbackLabel = ((int)response.StatusCode).ToString()
+					+ ": " + await response.Content.ReadAsStringAsync();
+				StateHasChanged();
+				return;
+			}
+
+			ClearMessages();
+			if (Activity.Group != null)
+				_nav.NavigateTo($"/group/{Activity.Group.GroupID}");
+			else
+				_nav.NavigateTo("/groups");
 		}
 
 		private void ClearMessages()
