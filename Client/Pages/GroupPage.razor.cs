@@ -263,5 +263,49 @@ namespace blazorSBIFS.Client.Pages
             }
             ReadGroupData();
         }
+        public void RemoveUsersActivity(Activity activity)
+        {
+            string url = "RemoveActivity";
+            IJson data = new GroupActivityDto()
+            {
+                GroupRequest = new GroupDto()
+                {
+                    GroupID = GroupID
+                },
+                ActivityRequest = new ActivityDto()
+                {
+                    ActivityID = activity.ActivityID
+                }
+            };
+            HttpResponseMessage response = _http.Post(url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                GroupID = 0;
+                return;
+            }
+            ReadGroupData();
+        }
+        public void AddUsersActivity(Activity activity)
+        {
+            string url = "AddActivity";
+            IJson data = new GroupActivityDto()
+            {
+                GroupRequest = new GroupDto()
+                {
+                    GroupID = GroupID
+                },
+                ActivityRequest = new ActivityDto()
+                {
+                    ActivityID = activity.ActivityID
+                }
+            };
+            HttpResponseMessage response = _http.Post(url, data).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                GroupID = 0;
+                return;
+            }
+            ReadGroupData();
+        }
     }
 }

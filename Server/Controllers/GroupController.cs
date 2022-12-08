@@ -203,6 +203,39 @@ namespace blazorSBIFS.Server.Controllers
             return Ok(group);
         }
 
+        [HttpPut("AddActivity"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<Group>> AddActivity(GroupActivityDto request)
+        {
+            if (request.GroupRequest == null || request.ActivityRequest == null)
+                return BadRequest("Request incomplete.");
+
+            int userID = _userService.GetUserID();
+            Group? group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupRequest.GroupID)
+                .Include(g => g.Participants)
+                .Include(g => g.Activities)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group.");
+
+            if (group.OwnerID != userID)
+                return Unauthorized("Only the group owner can add activities.");
+
+            Activity? activity = await _context.Activities
+                .Where(a => a.ActivityID == request.ActivityRequest.ActivityID)
+                .FirstOrDefaultAsync();
+            if (activity == null)
+                return BadRequest("No such activity.");
+
+            if (group.Activities.Contains(activity))
+                return BadRequest("Activity is already added to the group.");
+
+            group.Activities.Add(activity);
+            await _context.SaveChangesAsync();
+
+            return Ok(group);
+        }
+
         [HttpPut("RemoveParticipant"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<Group>> RemoveParticipant(GroupUserDto request)
         {
@@ -235,6 +268,38 @@ namespace blazorSBIFS.Server.Controllers
                 return BadRequest("User is not a participant in the selected group.");
 
             group.Participants.Remove(participant);
+            await _context.SaveChangesAsync();
+
+            return Ok(group);
+        }
+        [HttpPut("RemoveActivity"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<Group>> RemoveActivity(GroupActivityDto request)
+        {
+            if (request.GroupRequest == null || request.ActivityRequest == null)
+                return BadRequest("Request incomplete.");
+
+            int userID = _userService.GetUserID();
+            Group? group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupRequest.GroupID)
+                .Include(g => g.Participants)
+                .Include(g => g.Activities)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group.");
+
+            if (group.OwnerID != userID)
+                return Unauthorized("Only the group owner can remove activities.");
+
+            Activity? activity = await _context.Activities
+                .Where(a => a.ActivityID == request.ActivityRequest.ActivityID)
+                .FirstOrDefaultAsync();
+            if (activity == null)
+                return BadRequest("No such activity.");
+
+            if (!group.Activities.Contains(activity))
+                return BadRequest("Activity is not added to the group.");
+
+            group.Activities.Remove(activity);
             await _context.SaveChangesAsync();
 
             return Ok(group);
@@ -370,10 +435,10 @@ namespace blazorSBIFS.Server.Controllers
                 bool isOwed = false;
 
                 results += "// User: " + kvp.Key.Name
-                    + "\t - " + _context.UserLogins.
-                        Where(u => u.UserID == kvp.Key.UserID)
-                        .FirstAsync().Result.Email
-                    + "//\n";
+                                       + "\t - " + _context.UserLogins.
+                                           Where(u => u.UserID == kvp.Key.UserID)
+                                           .FirstAsync().Result.Email
+                                       + "//\n";
 
                 // Add what the user owes
                 results += "Owes:\n";
@@ -386,9 +451,9 @@ namespace blazorSBIFS.Server.Controllers
                         return "Error in db";
 
                     results += graph[i, kvp.Value]
-                        + ",- to: " + receiver.Name
-                        + " - " + receiverLogin.Email
-                        + "\n";
+                               + ",- to: " + receiver.Name
+                               + " - " + receiverLogin.Email
+                               + "\n";
 
                     if (!owes)
                         owes = true;
@@ -408,9 +473,9 @@ namespace blazorSBIFS.Server.Controllers
                         return "Error in db";
 
                     results += graph[kvp.Value, i]
-                        + ",- from: " + receiver.Name
-                        + " - " + receiverLogin.Email
-                        + "\n";
+                               + ",- from: " + receiver.Name
+                               + " - " + receiverLogin.Email
+                               + "\n";
 
                     if (!isOwed)
                         isOwed = true;
