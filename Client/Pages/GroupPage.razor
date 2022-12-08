@@ -14,7 +14,7 @@
 		@if (IsOwner) {
 			<div class="row">
 				<form action="" class="flexbox" onsubmit="return false;">
-					<input type="text" @bind-value="Group.Name" class="form-control form-input-flex"/>
+					<input type="text" @bind-value="GroupName" class="form-control form-input-flex"/>
 					<button class="btn btn-primary" @onclick="@(() => UpdateName())">Update</button>
 				</form>
 			</div>
@@ -30,7 +30,10 @@
 						<div class="row-list">
 							<form action="" class="flexbox list-item-container" onsubmit="return false;">
 								<p class="p-flex">@participant.Name</p>
-								<button @onclick="@(() => RemoveParticipant(participant))" class="btn btn-danger list-button">X</button>
+								@if (IsOwner)
+								{
+									<button @onclick="@(() => RemoveParticipant(participant))" class="btn btn-danger list-button">X</button>
+								}
 							</form>
 						</div>
 					}
@@ -78,6 +81,11 @@
 	<span>&nbsp;&nbsp;</span>
 	@if (GroupID != 0) {
 		<button class="btn btn-primary btn-flex" @onclick="(() => Calculate())">Calculate</button>
+	}
+	<span>&nbsp;&nbsp;</span>
+	@if (!IsOwner)
+	{
+		<button class="btn btn-danger btn-flex" @onclick="(() => LeaveGroup())">Leave Group</button>
 	}
 </div>
 

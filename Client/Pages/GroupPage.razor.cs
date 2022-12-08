@@ -13,10 +13,10 @@ namespace blazorSBIFS.Client.Pages
 
         [Parameter]
         public int GroupID { get; set; }
-        public string GroupName { get; set; } = "not found.";
+        public string GroupName { get; set; } = "Loading..";
         public Group? Group { get; set; }
         public string SearchEmail { get; set; } = string.Empty;
-        public bool IsOwner { get; set; } = true;
+        public bool IsOwner { get; set; } = false;
         public string ActivityMessage { get; set; } = string.Empty;
         public string ParticipantMessage { get; set; } = string.Empty;
 
@@ -36,6 +36,7 @@ namespace blazorSBIFS.Client.Pages
             if (!response.IsSuccessStatusCode)
             {
                 GroupID = 0;
+                StateHasChanged();
                 return;
             }
 
@@ -43,28 +44,111 @@ namespace blazorSBIFS.Client.Pages
             if (g == null)
             {
                 GroupID = 0;
+                StateHasChanged();
                 return;
             }
 
             Group = g;
             GroupName = g.Name;
+
+            // Check if Owner
+            url = "IsOwner";
+            data = new GroupDto { GroupID = this.GroupID };
+
+            response = await _http.Post(baseUrl + url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ActivityMessage = "Error defining owner.";
+                GroupID = 0;
+                StateHasChanged();
+                return;
+            }
+
+            IsOwner = await response.Content.ReadFromJsonAsync<bool>();
             StateHasChanged();
         }
 
-        public void UpdateName()
+        public async void UpdateName()
         {
-            GroupName = Group.Name;
+            if (GroupName == string.Empty)
+            {
+                ActivityMessage = "Group name cannot be empty.";
+                StateHasChanged();
+                return;
+            }
+
+            string url = "UpdateName";
+            IJson data = new GroupNameDto
+            {
+                GroupID = this.GroupID,
+                Name = GroupName
+            };
+
+            HttpResponseMessage response = await _http.Put(baseUrl + url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ActivityMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
+                return;
+            }
+
+            Group? group = await response.Content.ReadFromJsonAsync<Group>();
+            if (group == null)
+            {
+                ActivityMessage = "Something went wrong.";
+                StateHasChanged();
+                return;
+            }
+
+            ActivityMessage = "Name updated successfully.";
+            Group = group;
             StateHasChanged();
         }
 
         public void RemoveParticipant(User user)
         {
-            ParticipantMessage = "RemoveParticipant was called";
+            
         }
 
-        public void AddParticipant()
+        public async void AddParticipant()
         {
-            ParticipantMessage = "AddParticipant was called";
+            if (GroupID == 0)
+            {
+                ParticipantMessage = "No group to add participants to.";
+                StateHasChanged();
+                return;
+            }
+
+            string url = "AddParticipant";
+            GroupDto gDto = new GroupDto { GroupID = this.GroupID };
+            EmailDto eDto = new EmailDto { Email = SearchEmail };
+            IJson data = new GroupEmailDto
+            {
+                GroupRequest = gDto,
+                EmailRequest = eDto,
+            };
+
+            HttpResponseMessage response = await _http.Put(baseUrl + url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ParticipantMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
+                return;
+            }
+
+            Group? group = await response.Content.ReadFromJsonAsync<Group>();
+            if (group == null)
+            {
+                ParticipantMessage = "Unexpected error.";
+                GroupID = 0;
+                StateHasChanged();
+                return;
+            }
+
+            Group = group;
+            StateHasChanged();
         }
 
         public void EditActivity(Activity activity)
@@ -87,45 +171,11 @@ namespace blazorSBIFS.Client.Pages
             ActivityMessage = "Calculate was called";
         }
 
-        public void UpdateGroup()
+        public void LeaveGroup()
         {
-            string url = "UpdateGroup";
-            IJson data = new Group
-            {
-                GroupID = GroupID,
-                Name = Group.Name,
-                Participants = Group.Participants
-            };
-            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            UpdateName();
+            ActivityMessage = "LeaveGroup was called";
         }
-        public void ReadGroupData()
-        {
-            string url = "ReadOne";
-            IJson data = new GroupDto()
-            {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            Group? g = response.Content.ReadFromJsonAsync<Group>().Result;
-            if (g == null)
-            {
-                GroupID = 0;
-                return;
-            }
-            Group = g;
-            UpdateName();
-        }
+
         public void OwnerDeletesGroup()
         {
             string url = "Delete";
@@ -139,7 +189,7 @@ namespace blazorSBIFS.Client.Pages
                 GroupID = 0;
                 return;
             }
-            _nav.NavigateTo("groups");
+            _nav.NavigateTo("/groups");
         }
 
         public void OwnerRemovesUser(User user)
@@ -167,31 +217,6 @@ namespace blazorSBIFS.Client.Pages
             StateHasChanged();
         }
 
-        public void OwnerAddsUsers(User user) //
-        {
-            //AddParticipant(user);
-            //string url = "AddParticipant";
-            //IJson data = new GroupEmailDto()
-            //{
-            //    GroupRequest = new GroupDto()
-            //    {
-            //        GroupID = GroupID
-            //    },
-            //    EmailRequest = new EmailDto()
-            //    {
-            //        Email = SearchEmail
-
-            //    }
-            //};
-            //HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
-            //if (!response.IsSuccessStatusCode)
-            //{
-            //    string error = response.Content.ReadAsStringAsync().Result;
-            //    Console.WriteLine(error);
-            //    return;
-            //}
-            //StateHasChanged();
-        }
         public void UserLeavesGroup() //Method that allows a user to leave the group, if they are not the owner.
         {
             string url = "LeaveGroup";
