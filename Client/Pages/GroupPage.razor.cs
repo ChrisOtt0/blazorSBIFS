@@ -102,6 +102,7 @@ namespace blazorSBIFS.Client.Pages
             }
 
             ActivityMessage = "Name updated successfully.";
+            ParticipantMessage = string.Empty;
             Group = group;
             StateHasChanged();
         }
@@ -143,8 +144,7 @@ namespace blazorSBIFS.Client.Pages
             }
 
             Group = group;
-            ParticipantMessage = string.Empty;
-            StateHasChanged();
+            ClearMessages();
         }
 
         public async void RemoveParticipant(User user)
@@ -183,8 +183,7 @@ namespace blazorSBIFS.Client.Pages
             }
 
             Group = group;
-            ParticipantMessage = string.Empty;
-            StateHasChanged();
+            ClearMessages();
 		}
 
         public async void AddActivity()
@@ -224,14 +223,13 @@ namespace blazorSBIFS.Client.Pages
             }
 
             Group.Activities = activities;
-            StateHasChanged();
+            ClearMessages();
         }
 
         public void EditActivity(Activity activity)
         {
             ActivityMessage = "EditActivity was called";
         }
-
 
         public void GoBack()
         {
@@ -264,81 +262,59 @@ namespace blazorSBIFS.Client.Pages
                 return;
             }
 
+            ClearMessages();
             _nav.NavigateTo("/groups");
         }
 
-        public void OwnerDeletesGroup()
+        public async void DeleteGroup()
         {
+            if (GroupID == 0)
+            {
+                ActivityMessage = "No group to delete.";
+                StateHasChanged();
+                return;
+            }
+
             string url = "Delete";
-            IJson data = new GroupDto()
-            {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Delete(baseUrl + url, data).Result;
+            IJson data = new GroupDto { GroupID = this.GroupID };
+
+            HttpResponseMessage response = await _http.Delete(baseUrl + url, data);
             if (!response.IsSuccessStatusCode)
             {
-                GroupID = 0;
+                ActivityMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
                 return;
             }
+
+            ClearMessages();
             _nav.NavigateTo("/groups");
         }
 
-        public void OwnerRemovesUser(User user)
+        private void ClearMessages()
         {
-            RemoveParticipant(user);
-            string url = "RemoveParticipant";
-            IJson data = new GroupUserDto()
-            {
-                GroupRequest = new GroupDto()
-                {
-                    GroupID = GroupID
-                },
-                UserRequest = new UserDto()
-                {
-                    UserID = user.UserID
-                }
-            };
-            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                string error = response.Content.ReadAsStringAsync().Result;
-                Console.WriteLine(error);
-                return;
-            }
+            ActivityMessage = string.Empty;
+            ParticipantMessage = string.Empty;
             StateHasChanged();
         }
 
-        public void UserLeavesGroup() //Method that allows a user to leave the group, if they are not the owner.
-        {
-            string url = "LeaveGroup";
-            IJson data = new GroupDto()
-            {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            _nav.NavigateTo("groups");
-        }
+        // Method below belongs in ActivityPage
+        //public void UserDeletesActivity(Activity activity)
+        //{
+        //    string url = "Delete";
+        //    IJson data = new ActivityDto()
+        //    {
+        //        ActivityID = activity.ActivityID
+        //    };
+        //    HttpResponseMessage response = _http.Delete(url, data).Result;
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        GroupID = 0;
+        //        return;
+        //    }
+        //    //ReadGroupData();
+        //}
 
-        public void UserDeletesActivity(Activity activity)
-        {
-            string url = "Delete";
-            IJson data = new ActivityDto()
-            {
-                ActivityID = activity.ActivityID
-            };
-            HttpResponseMessage response = _http.Delete(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            //ReadGroupData();
-        }
         public void UserEditsActivity(Activity activity)
         {
             string url = "UpdateActivity";
@@ -357,49 +333,22 @@ namespace blazorSBIFS.Client.Pages
             }
             //ReadGroupData();
         }
-        public void UserAddsActivity(Activity activity)
-        {
-            string url = "Create";
-            IJson data = new GroupDto()
-            {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Post(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            //ReadGroupData();
-        }
-        public void UserReadsActivity(Activity activity)
-        {
-            string url = "ReadOne";
-            IJson data = new ActivityDto()
-            {
-                ActivityID = activity.ActivityID
-            };
-            HttpResponseMessage response = _http.Post(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            //ReadGroupData();
-        }
-        public void OwnerReadsAllActivities()
-        {
-            string url = "ReadMany";
-            IJson data = new GroupDto()
-            {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Post(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-        }
+
+        // Method below belongs in ActivityPage
+        //public void UserReadsActivity(Activity activity)
+        //{
+        //    string url = "ReadOne";
+        //    IJson data = new ActivityDto()
+        //    {
+        //        ActivityID = activity.ActivityID
+        //    };
+        //    HttpResponseMessage response = _http.Post(url, data).Result;
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        GroupID = 0;
+        //        return;
+        //    }
+        //    //ReadGroupData();
+        //}
     }
 }
