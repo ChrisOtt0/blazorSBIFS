@@ -298,41 +298,5 @@ namespace blazorSBIFS.Client.Pages
             ParticipantMessage = string.Empty;
             StateHasChanged();
         }
-
-        // Method below belongs in ActivityPage
-        //public void UserDeletesActivity(Activity activity)
-        //{
-        //    string url = "Delete";
-        //    IJson data = new ActivityDto()
-        //    {
-        //        ActivityID = activity.ActivityID
-        //    };
-        //    HttpResponseMessage response = _http.Delete(url, data).Result;
-        //    if (!response.IsSuccessStatusCode)
-        //    {
-        //        GroupID = 0;
-        //        return;
-        //    }
-        //    //ReadGroupData();
-        //}
-
-        public void UserEditsActivity(Activity activity)
-        {
-            string url = "UpdateActivity";
-            IJson data = new Activity()
-            {
-                ActivityID = activity.ActivityID,
-                Group = activity.Group,
-                Amount = activity.Amount,
-                Description = activity.Description,
-            };
-            HttpResponseMessage response = _http.Put(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            //ReadGroupData();
-        }
     }
 }
