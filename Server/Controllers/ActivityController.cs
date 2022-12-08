@@ -131,6 +131,5 @@ namespace blazorSBIFS.Server.Controllers
 
             return NoContent();
         }
-        
     }
 }

@@ -265,17 +265,10 @@ namespace blazorSBIFS.Client.Pages
         }
         public void RemoveUsersActivity(Activity activity)
         {
-            string url = "RemoveActivity";
-            IJson data = new GroupActivityDto()
+            string url = "Delete";
+            IJson data = new ActivityDto()
             {
-                GroupRequest = new GroupDto()
-                {
-                    GroupID = GroupID
-                },
-                ActivityRequest = new ActivityDto()
-                {
-                    ActivityID = activity.ActivityID
-                }
+                ActivityID = activity.ActivityID
             };
             HttpResponseMessage response = _http.Post(url, data).Result;
             if (!response.IsSuccessStatusCode)
@@ -287,17 +280,10 @@ namespace blazorSBIFS.Client.Pages
         }
         public void AddUsersActivity(Activity activity)
         {
-            string url = "AddActivity";
-            IJson data = new GroupActivityDto()
+            string url = "Create";
+            IJson data = new GroupDto()
             {
-                GroupRequest = new GroupDto()
-                {
-                    GroupID = GroupID
-                },
-                ActivityRequest = new ActivityDto()
-                {
-                    ActivityID = activity.ActivityID
-                }
+                GroupID = GroupID
             };
             HttpResponseMessage response = _http.Post(url, data).Result;
             if (!response.IsSuccessStatusCode)
