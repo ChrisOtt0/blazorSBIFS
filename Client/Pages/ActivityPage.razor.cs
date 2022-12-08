@@ -20,7 +20,7 @@ namespace blazorSBIFS.Client.Pages
 		public List<ResponsibleParticipant> ResponsibleParticipants { get; set; } = new List<ResponsibleParticipant>();
 		public string AmountString { get; set; } = string.Empty;
 		public string FeedbackLabel { get; set; } = string.Empty;
-		public bool IsOwner { get; set; } = true;
+		public bool IsOwner { get; set; } = false;
 
 		protected override async void OnInitialized()
 		{
@@ -59,8 +59,19 @@ namespace blazorSBIFS.Client.Pages
 				StateHasChanged();
 				return;
 			}
-
 			AmountString = Activity.Amount.ToString();
+
+			// Check if IsOwner
+			url = "IsOwner";
+			response = await _http.Post(baseUrl + url, data);
+			if (!response.IsSuccessStatusCode)
+			{
+				FeedbackLabel = ((int)response.StatusCode).ToString()
+					+ ": " + await response.Content.ReadAsStringAsync();
+				StateHasChanged();
+				return;
+			}
+			IsOwner = await response.Content.ReadFromJsonAsync<bool>();
 
 			// Read GroupParticipants
 			url = "Group/ReadParticipants";

@@ -46,6 +46,22 @@ namespace blazorSBIFS.Server.Controllers
             return Ok(group.Activities);
         }
 
+        [HttpPost("IsOwner"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<bool>> IsOwner(ActivityDto request)
+        {
+            int userID = _userService.GetUserID();
+            Activity? activity = await _context.Activities
+                .Where(a => a.ActivityID == request.ActivityID)
+                .Include(a => a.Group)
+                .FirstOrDefaultAsync();
+            if (activity == null)
+                return BadRequest("No such activity");
+            if (activity.Group == null)
+                return BadRequest("Unexpected error - Activity not tied to a group");
+
+            return Ok(activity.OwnerID == userID || activity.Group.OwnerID == userID);
+        }
+
         [HttpPost("ReadOne"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<Activity>> ReadOne(ActivityDto request)
         {
