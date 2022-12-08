@@ -140,7 +140,7 @@ h5 {
     min-width: 100px;
     max-width: 800px;
     min-height: 300px;
-    max-height: 500px;
+    max-height: 300px;
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;

@@ -105,6 +105,7 @@ namespace blazorSBIFS.Client.Pages
             Group = group;
             StateHasChanged();
         }
+
         public async void AddParticipant()
         {
             if (GroupID == 0)
@@ -186,16 +187,51 @@ namespace blazorSBIFS.Client.Pages
             StateHasChanged();
 		}
 
+        public async void AddActivity()
+        {
+            if (GroupID == 0)
+            {
+                ActivityMessage = "No group to add activity to.";
+                StateHasChanged();
+                return;
+            }
+
+            string url = "Activity/Create";
+            IJson data = new GroupDto { GroupID = this.GroupID };
+
+            HttpResponseMessage response = await _http.Post(url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ActivityMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
+                return;
+            }
+
+            List<Activity>? activities = await response.Content.ReadFromJsonAsync<List<Activity>>();
+            if (activities == null)
+            {
+                ActivityMessage = "Unexpected error.";
+                StateHasChanged();
+                return;
+            }
+
+            if (Group == null)
+            {
+                ActivityMessage = "Unexpected error.";
+                StateHasChanged();
+                return;
+            }
+
+            Group.Activities = activities;
+            StateHasChanged();
+        }
 
         public void EditActivity(Activity activity)
         {
             ActivityMessage = "EditActivity was called";
         }
 
-        public void AddActivity()
-        {
-            ActivityMessage = "AddActivity was called";
-        }
 
         public void GoBack()
         {
@@ -207,9 +243,28 @@ namespace blazorSBIFS.Client.Pages
             ActivityMessage = "Calculate was called";
         }
 
-        public void LeaveGroup()
+        public async void LeaveGroup()
         {
-            ActivityMessage = "LeaveGroup was called";
+            if (GroupID == 0)
+            {
+                ActivityMessage = "No group to leave.";
+                StateHasChanged();
+                return;
+            }
+
+            string url = "LeaveGroup";
+            IJson data = new GroupDto() { GroupID = this.GroupID };
+
+            HttpResponseMessage response = await _http.Put(baseUrl+ url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ActivityMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
+                return;
+            }
+
+            _nav.NavigateTo("/groups");
         }
 
         public void OwnerDeletesGroup()

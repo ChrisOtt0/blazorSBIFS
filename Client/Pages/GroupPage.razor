@@ -30,7 +30,7 @@
 						<div class="row-list">
 							<form action="" class="flexbox list-item-container" onsubmit="return false;">
 								<p class="p-flex">@participant.Name</p>
-								@if (IsOwner)
+								@if (IsOwner && participant.UserID != Group.OwnerID)
 								{
 									<button @onclick="@(() => RemoveParticipant(participant))" class="btn btn-danger list-button">X</button>
 								}
