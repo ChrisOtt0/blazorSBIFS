@@ -202,39 +202,6 @@ namespace blazorSBIFS.Server.Controllers
 
             return Ok(group);
         }
-
-        [HttpPut("AddActivity"), Authorize(Roles = "admin, user")]
-        public async Task<ActionResult<Group>> AddActivity(GroupActivityDto request)
-        {
-            if (request.GroupRequest == null || request.ActivityRequest == null)
-                return BadRequest("Request incomplete.");
-
-            int userID = _userService.GetUserID();
-            Group? group = await _context.Groups
-                .Where(g => g.GroupID == request.GroupRequest.GroupID)
-                .Include(g => g.Participants)
-                .Include(g => g.Activities)
-                .FirstOrDefaultAsync();
-            if (group == null)
-                return BadRequest("No such group.");
-
-            if (group.OwnerID != userID)
-                return Unauthorized("Only the group owner can add activities.");
-
-            Activity? activity = await _context.Activities
-                .Where(a => a.ActivityID == request.ActivityRequest.ActivityID)
-                .FirstOrDefaultAsync();
-            if (activity == null)
-                return BadRequest("No such activity.");
-
-            if (group.Activities.Contains(activity))
-                return BadRequest("Activity is already added to the group.");
-
-            group.Activities.Add(activity);
-            await _context.SaveChangesAsync();
-
-            return Ok(group);
-        }
         [HttpDelete("Delete"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult> Delete(GroupDto request)
         {
