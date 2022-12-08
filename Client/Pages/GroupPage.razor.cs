@@ -105,12 +105,6 @@ namespace blazorSBIFS.Client.Pages
             Group = group;
             StateHasChanged();
         }
-
-        public void RemoveParticipant(User user)
-        {
-            
-        }
-
         public async void AddParticipant()
         {
             if (GroupID == 0)
@@ -148,8 +142,50 @@ namespace blazorSBIFS.Client.Pages
             }
 
             Group = group;
+            ParticipantMessage = string.Empty;
             StateHasChanged();
         }
+
+        public async void RemoveParticipant(User user)
+        {
+			if (GroupID == 0)
+			{
+				ParticipantMessage = "No group to add participants to.";
+				StateHasChanged();
+				return;
+			}
+
+            string url = "RemoveParticipant";
+            GroupDto gDto = new GroupDto { GroupID = this.GroupID };
+            UserDto uDto = new UserDto { UserID = user.UserID };
+            IJson data = new GroupUserDto
+            {
+                GroupRequest = gDto,
+                UserRequest = uDto,
+            };
+
+            HttpResponseMessage response = await _http.Put(baseUrl + url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ParticipantMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
+                return;
+            }
+
+            Group? group = await response.Content.ReadFromJsonAsync<Group>();
+            if (group == null)
+            {
+                ParticipantMessage = "Unexpected error.";
+                StateHasChanged();
+                return;
+            }
+
+            Group = group;
+            ParticipantMessage = string.Empty;
+            StateHasChanged();
+		}
+
 
         public void EditActivity(Activity activity)
         {
@@ -246,7 +282,7 @@ namespace blazorSBIFS.Client.Pages
                 GroupID = 0;
                 return;
             }
-            ReadGroupData();
+            //ReadGroupData();
         }
         public void UserEditsActivity(Activity activity)
         {
@@ -264,7 +300,7 @@ namespace blazorSBIFS.Client.Pages
                 GroupID = 0;
                 return;
             }
-            ReadGroupData();
+            //ReadGroupData();
         }
         public void UserAddsActivity(Activity activity)
         {
@@ -279,7 +315,7 @@ namespace blazorSBIFS.Client.Pages
                 GroupID = 0;
                 return;
             }
-            ReadGroupData();
+            //ReadGroupData();
         }
         public void UserReadsActivity(Activity activity)
         {
@@ -294,7 +330,7 @@ namespace blazorSBIFS.Client.Pages
                 GroupID = 0;
                 return;
             }
-            ReadGroupData();
+            //ReadGroupData();
         }
         public void OwnerReadsAllActivities()
         {
@@ -309,7 +345,6 @@ namespace blazorSBIFS.Client.Pages
                 GroupID = 0;
                 return;
             }
-            ReadGroupData();
         }
     }
 }
