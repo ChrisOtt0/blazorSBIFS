@@ -15,8 +15,11 @@ namespace blazorSBIFS.Client.Pages
         public int GroupID { get; set; }
         public string GroupName { get; set; } = "not found.";
         public Group? Group { get; set; }
-        public string Email { get; set; }
-        
+        public string SearchEmail { get; set; } = string.Empty;
+        public bool IsOwner { get; set; } = true;
+        public string ActivityMessage { get; set; } = string.Empty;
+        public string ParticipantMessage { get; set; } = string.Empty;
+
         protected override async void OnInitialized()
         {
             base.OnInitialized();
@@ -56,14 +59,34 @@ namespace blazorSBIFS.Client.Pages
 
         public void RemoveParticipant(User user)
         {
-            Group.Participants.Remove(user);
-            StateHasChanged();
+            ParticipantMessage = "RemoveParticipant was called";
         }
-        public void AddParticipant(User user)
+
+        public void AddParticipant()
         {
-            Group.Participants.Add(user);
-            StateHasChanged();
+            ParticipantMessage = "AddParticipant was called";
         }
+
+        public void EditActivity(Activity activity)
+        {
+            ActivityMessage = "EditActivity was called";
+        }
+
+        public void AddActivity()
+        {
+            ActivityMessage = "AddActivity was called";
+        }
+
+        public void GoBack()
+        {
+            _nav.NavigateTo("/groups");
+        }
+
+        public void Calculate()
+        {
+            ActivityMessage = "Calculate was called";
+        }
+
         public void UpdateGroup()
         {
             string url = "UpdateGroup";
@@ -146,28 +169,28 @@ namespace blazorSBIFS.Client.Pages
 
         public void OwnerAddsUsers(User user) //
         {
-            AddParticipant(user);
-            string url = "AddParticipant";
-            IJson data = new GroupEmailDto()
-            {
-                GroupRequest = new GroupDto()
-                {
-                    GroupID = GroupID
-                },
-                EmailRequest = new EmailDto()
-                {
-                    Email = Email
-                    
-                }
-            };
-            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                string error = response.Content.ReadAsStringAsync().Result;
-                Console.WriteLine(error);
-                return;
-            }
-            StateHasChanged();
+            //AddParticipant(user);
+            //string url = "AddParticipant";
+            //IJson data = new GroupEmailDto()
+            //{
+            //    GroupRequest = new GroupDto()
+            //    {
+            //        GroupID = GroupID
+            //    },
+            //    EmailRequest = new EmailDto()
+            //    {
+            //        Email = SearchEmail
+
+            //    }
+            //};
+            //HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
+            //if (!response.IsSuccessStatusCode)
+            //{
+            //    string error = response.Content.ReadAsStringAsync().Result;
+            //    Console.WriteLine(error);
+            //    return;
+            //}
+            //StateHasChanged();
         }
         public void UserLeavesGroup() //Method that allows a user to leave the group, if they are not the owner.
         {

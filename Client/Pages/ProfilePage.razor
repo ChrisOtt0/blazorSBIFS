@@ -16,7 +16,6 @@
 		<button class="btn btn-primary" @onclick="SaveChanges">Save Changes</button>
 		<p class="feedback-label">@ChangesMessage</p>
 		<br />
-		<br />
 		<input type="password" @bind-value="OldPassword" class="form-control form-input" placeholder="Old password" />
 		<br />
 		<input type="password" @bind-value="NewPassword" class="form-control form-input" placeholder="New password" />
@@ -25,7 +24,6 @@
 		<br />
 		<button class="btn btn-primary" @onclick="UpdatePassword">Update Password</button>
 		<p class="feedback-label">@PasswordMessage</p>
-		<br />
 		<br />
 		<button class="btn btn-danger" @onclick="@(() => _nav.NavigateTo("/deleteAccount"))">Delete Account</button>
 	</div>
