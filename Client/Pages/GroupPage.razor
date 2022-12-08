@@ -7,7 +7,7 @@
 <PageTitle>Group @GroupName</PageTitle>
 
 <div class="content-div">
-	<h1>Group @GroupName</h1>
+	<h1>Group: @GroupName</h1>
 	@if (Group == null) {
 		<h3>Group not found</h3>
 	} else {
@@ -58,7 +58,7 @@
 					@foreach (Activity activity in Group.Activities) {
 						<div class="row-list">
 							<form action="" class="flexbox list-item-container" onsubmit="return false;">
-								<p class="p-flex">@activity.Description</p>
+								<p class="p-flex">@ShortenedActivityDescription(activity)</p>
 								<p class="p-double">@activity.Amount</p>
 								<button @onclick="@(() => EditActivity(activity))" class="btn btn-primary list-button">Edit</button>
 							</form>

@@ -123,12 +123,21 @@ h5 {
     flex: 1;
 }
 
+.label-flex {
+    margin: 20px 22px;
+}
+
 .participant-message {
     margin: 0 10px;
 }
 
 .activity-message {
+    margin: 5px 80px 5px 2px;
+}
+
+.input-label {
     margin: 5px 2px;
+    font-weight: 600;
 }
 
 .content-div {
@@ -176,6 +185,17 @@ h5 {
     margin: 2px;
 }
 
+.input-checkbox {
+    float: right;
+    font-size: 12px;
+    margin: 2px 10px;
+}
+
+    .input-checkbox:focus {
+        outline: none;
+        box-shadow: 1px 1px 2px 1px var(--bs-gray-600);
+    }
+
 .btn-flex {
     flex: 1;
     min-width: 150px;
@@ -193,6 +213,8 @@ h5 {
     padding: 2px;
     float: left;
 }
+
+
 
 .p-double {
     margin: 3.5px 10px;
@@ -217,6 +239,10 @@ h5 {
     font-size: 16px;
     font-weight: 600;
     min-width: 150px;
+}
+
+.input-amount {
+    text-align: right;
 }
 
 .row {
@@ -257,6 +283,28 @@ h5 {
     display: flex;
     -webkit-flex-flow: row wrap;
     -webkit-flex-wrap: wrap;
-    -ms-flex-wrap: wrap;
+    -ms-flex-wrap: wrap; 
     flex-wrap: wrap;
 }
+
+.description-textarea {
+    margin: 2px;
+    min-width: 100%;
+    min-height: 300px;
+    max-height: 300px;
+    resize: none;
+
+    width: auto;
+    border: 2px solid var(--bs-gray-500);
+}
+
+    .description-textarea:active {
+        box-shadow: 1px 1px 2px 1px var(--bs-gray-500);
+        outline: none;
+    }
+
+    .description-textarea:focus {
+        box-shadow: 1px 1px 2px 1px var(--bs-gray-500);
+        outline: none;
+    }
+

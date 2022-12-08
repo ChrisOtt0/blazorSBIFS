@@ -292,6 +292,18 @@ namespace blazorSBIFS.Client.Pages
             _nav.NavigateTo("/groups");
         }
 
+        public string ShortenedActivityDescription(Activity activity)
+        {
+            if (activity.Description == null || activity.Description == string.Empty) return "New Activity";
+
+            if (activity.Description.IndexOf("\n") > -1)
+                return activity.Description.Substring(0, activity.Description.IndexOf("\n"));
+            else if (activity.Description.IndexOf(" ") > -1)
+                return activity.Description.Substring(0, activity.Description.IndexOf(" "));
+            else
+                return activity.Description;
+        }
+
         private void ClearMessages()
         {
             ActivityMessage = string.Empty;
