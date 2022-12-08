@@ -79,11 +79,9 @@ h5 {
 }
 
 .center {
-    background: var(--bs-gray-100);
     margin: auto;
     max-width: 90%;
     height: 50vh;
-    border: 3px solid var(--bs-gray-100);
     padding: 10px;
     text-align: center;
     position: relative;

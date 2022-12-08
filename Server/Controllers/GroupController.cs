@@ -49,7 +49,7 @@ namespace blazorSBIFS.Server.Controllers
                 .Include(g => g.Participants)
                 .ToListAsync();
             if (allGroups == null || allGroups.Count == 0)
-                return Ok(null);
+                return NoContent();
 
             List<Group> groups = allGroups.Where(g => g.Participants.Contains(user)).ToList();
             return Ok(groups);
