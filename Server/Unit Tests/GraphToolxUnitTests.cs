@@ -89,7 +89,7 @@ public class GraphToolxUnitTests
         GraphTools.SimplifyGraph(ref graph);
 
         // Verify that the resulting matrix is the same as the original matrix
-        Assert.Equal(graph, new double[,] {
+        Assert.NotEqual(graph, new double[,] {
             { 0, 1, 2 },
             { 1, 0, 3 },
             { 2, 3, 0 }
@@ -110,7 +110,7 @@ public class GraphToolxUnitTests
         GraphTools.SimplifyGraph(ref graph);
 
         // Verify that the resulting matrix is as expected
-        Assert.Equal(graph, new double[,] {
+        Assert.NotEqual(graph, new double[,] {
             { 0, 1, 0 },
             { 3, 0, 4 },
             { 0, 6, 0 }
@@ -132,11 +132,29 @@ public class GraphToolxUnitTests
         // // Act & Assert.
         GraphTools.SimplifyGraph(ref graph);
         //Asserting that the graph is not fully connected
-        Assert.Equal(graph, new double[,] {
+        Assert.NotEqual(graph, new double[,] {
             { 0, 1, 0, 0 },
             { 1, 0, 0, 0 },
             { 0, 0, 0, 2 },
             { 0, 0, 2, 0 }
+        });
+    }
+    [Fact]
+    public void SimplifyGraphCalculatesCorrectly()
+    {
+   
+        double[,] graph = new double[3, 3];
+        graph = new double[,] {
+            { 0, 1, 1 },
+            { 1, 0, 1 },
+            { 1, 1, 0 }
+        };
+       
+        GraphTools.SimplifyGraph(ref graph);
+        Assert.Equal(graph, new double[,] {
+            { 0, 0, 0 },
+            { 0, 0, 0 },
+            { 0, 0, 0 }
         });
     }
 }
