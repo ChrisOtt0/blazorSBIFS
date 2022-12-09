@@ -9,6 +9,6 @@ namespace blazorSBIFS.Shared.DataTransferObjects
     public class GroupUserDto : IJson
     {
         public GroupDto GroupRequest { get; set; } = new GroupDto();
-        public EmailDto UserRequest { get; set; } = new EmailDto();
+        public UserDto UserRequest { get; set; } = new UserDto();
     }
 }

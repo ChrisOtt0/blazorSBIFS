@@ -17,15 +17,16 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpPost("Create"), Authorize(Roles = "admin, user")]
-        public async Task<ActionResult<List<Activity>>> Create(GroupDto requestedGroup)
+        public async Task<ActionResult<List<Activity>>> Create(GroupDto request)
         {
             int userID = _userService.GetUserID();
-            var user = await _context.Users.FindAsync(userID);
+            User? user = await _context.Users.FindAsync(userID);
             if (user == null)
                 return BadRequest("No such user.");
 
-            var group = await _context.Groups
-                .Where(g => g.GroupID == requestedGroup.GroupID)
+            Group? group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupID)
+                .Where(g => g.Participants.Contains(user))
                 .Include(g => g.Activities)
                 .FirstOrDefaultAsync();
             if (group == null)
@@ -48,7 +49,7 @@ namespace blazorSBIFS.Server.Controllers
         [HttpPost("ReadOne"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<Activity>> ReadOne(ActivityDto request)
         {
-            var activity = await _context.Activities
+            Activity? activity = await _context.Activities
                 .Where(a => a.ActivityID == request.ActivityID)
                 .Include(a => a.Group)
                 .Include(a => a.Participants)
@@ -62,10 +63,12 @@ namespace blazorSBIFS.Server.Controllers
         [HttpPost("ReadMany"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<List<Activity>>> ReadActivities(GroupDto request)
         {
-            var activities = await _context.Groups
+            List<Activity>? activities = await _context.Groups
                 .Where(g => g.GroupID == request.GroupID)
                 .Select(g => g.Activities)
-                .ToListAsync();
+                .FirstOrDefaultAsync();
+            if (activities == null)
+                return BadRequest("No such group.");
 
             return Ok(activities);
         }
@@ -73,15 +76,41 @@ namespace blazorSBIFS.Server.Controllers
         [HttpPut("UpdateActivity"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult> UpdateActivity(Activity request)
         {
-            var activity = await _context.Activities
+            Activity? activity = await _context.Activities
                 .Where(a => a.ActivityID == request.ActivityID)
-                .Include(a => a.Group)
+                .Include(a => a.Group).ThenInclude(g => g.Participants)
                 .Include(a => a.Participants)
                 .FirstOrDefaultAsync();
             if (activity == null)
                 return BadRequest("No such activity");
 
-            activity = request;
+            // Updates all scalary information.
+            var entry = _context.Entry(activity);
+            entry.CurrentValues.SetValues(request);
+
+            // Update Participants
+            List<User> participants = activity.Group.Participants.ToList();
+
+            foreach (User p in participants)
+            {
+                User? participant = request.Participants.SingleOrDefault(u => u.UserID == p.UserID);
+                if (participant == null && activity.Participants.Contains(p))
+                    entry.Entity.Participants.Remove(await _context.Users.FindAsync(p.UserID));
+            }
+
+            foreach (User participant in request.Participants)
+            {
+                User? p = activity.Participants.SingleOrDefault(u => u.UserID == participant.UserID);
+                if (p == null)
+                {
+                    p = await _context.Users
+                        .FindAsync(participant.UserID);
+                    if (p == null)
+                        continue;
+                }
+                entry.Entity.Participants.Add(await _context.Users.FindAsync(p.UserID));
+            }
+
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -90,15 +119,12 @@ namespace blazorSBIFS.Server.Controllers
         public async Task<ActionResult> Delete(ActivityDto request)
         {
             int userID = _userService.GetUserID();
-            var activity = await _context.Activities
+            Activity? activity = await _context.Activities
                 .Where(a => a.ActivityID == request.ActivityID)
                 .Include(a => a.Group)
                 .FirstOrDefaultAsync();
             if (activity == null)
                 return BadRequest("No such activity.");
-
-            if (activity.OwnerID != userID && activity.Group.OwnerID != userID)
-                return BadRequest("Only the activity owner or the group owner can delete an activity.");
 
             _context.Activities.Remove(activity);
             await _context.SaveChangesAsync();

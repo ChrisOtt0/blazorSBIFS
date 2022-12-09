@@ -7,6 +7,7 @@ using System.Data;
 
 namespace blazorSBIFS.Server.Controllers
 {
+    // Returns custom DTOs instead of User objects, to be able to include user email from the UserLogin table for potential manipulation.
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -23,11 +24,13 @@ namespace blazorSBIFS.Server.Controllers
         [HttpGet("ReadOne"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult<UserDto>> ReadOne()
         {
-            var userID = _userService.GetUserID();
-            var login = await _context.UserLogins
+            int userID = _userService.GetUserID();
+            UserLogin? login = await _context.UserLogins
                 .Where(l => l.UserID == userID)
                 .Include(l => l.User)
-                .FirstAsync();
+                .FirstOrDefaultAsync();
+            if (login == null)
+                return BadRequest("No such user.");
 
             IJson data = new UserDto
             {
@@ -65,10 +68,10 @@ namespace blazorSBIFS.Server.Controllers
         {
             string hashedPass = string.Empty;
             int userID = _userService.GetUserID();
-            var login = await _context.UserLogins
+            UserLogin? login = await _context.UserLogins
                 .Where(l => l.UserID == userID)
                 .Include(l => l.User)
-                .FirstAsync();
+                .FirstOrDefaultAsync();
             if (login == null)
                 return BadRequest("No such user.");
 
@@ -78,7 +81,7 @@ namespace blazorSBIFS.Server.Controllers
             }
             if (request.Email != null && request.Email != string.Empty && request.Email != login.Email)
             {
-                var isUser = await _context.UserLogins.FirstOrDefaultAsync(u => u.Email == request.Email);
+                UserLogin? isUser = await _context.UserLogins.FirstOrDefaultAsync(u => u.Email == request.Email);
                 if (isUser != null)
                     return UnprocessableEntity("User with given email already exists. Could not update the account.");
 
@@ -93,13 +96,15 @@ namespace blazorSBIFS.Server.Controllers
         public async Task<ActionResult> Update(PasswordDto request)
         {
             int userID = _userService.GetUserID();
-            var user = await _context.Users.FindAsync(userID);
+            User? user = await _context.Users.FindAsync(userID);
             if (user == null)
                 return BadRequest("No such user.");
 
-            var login = await _context.UserLogins
+            UserLogin? login = await _context.UserLogins
                 .Where(l => l.UserID == userID)
-                .FirstAsync();
+                .FirstOrDefaultAsync();
+            if (login == null)
+                return BadRequest("No such user.");
 
             string salt = new SaltAdapter().GetSalt();
             string hashedPass = SecurityTools.HashString(request.OldPassword, salt);
@@ -118,7 +123,7 @@ namespace blazorSBIFS.Server.Controllers
         public async Task<ActionResult> Delete(UserLoginDto request)
         {
             int userID = _userService.GetUserID();
-            var login = await _context.UserLogins
+            UserLogin? login = await _context.UserLogins
                 .Where(l => l.UserID == userID)
                 .Include(l => l.User)
                 .FirstAsync();
@@ -134,7 +139,7 @@ namespace blazorSBIFS.Server.Controllers
             if (login.Password != hashedPass)
                 return UnprocessableEntity("Wrong email or password.");
 
-            var user = login.User;
+            User user = login.User;
             List<Group> groups = await _context.Groups.Where(g => g.OwnerID == userID).ToListAsync();
 
             _context.Groups.RemoveRange(groups);
