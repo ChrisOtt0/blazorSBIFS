@@ -21,12 +21,14 @@ namespace blazorSBIFS.Client.Pages
             if (Email == string.Empty || Email == "")
             {
                 Message = "Please enter an email to login.";
+                StateHasChanged();
                 return;
             }
 
             if (Password == string.Empty || Password == "")
             {
                 Message = "No password given.";
+                StateHasChanged();
                 return;
             }
 
@@ -53,15 +55,18 @@ namespace blazorSBIFS.Client.Pages
                 // Unauthorized
                 case 401:
                     Message = await response.Content.ReadAsStringAsync();
+                    StateHasChanged();
                     break;
 
                 // Server Error
                 case 500:
                     Message = "Server Error. Check logs at: {log_path}";
+                    StateHasChanged();
                     break;
 
                 default:
                     Message = ((int)response.StatusCode).ToString() + ": " + await response.Content.ReadAsStringAsync();
+                    StateHasChanged();
                     break;
             }
         }

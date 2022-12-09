@@ -24,18 +24,22 @@ namespace blazorSBIFS.Client.Pages
             if (Name == string.Empty || Name == "")
             {
                 Message = "Please enter a name to register your account.";
+                StateHasChanged();
                 return;
             }
 
             if (Email == string.Empty || Email == "")
             {
                 Message = "Please enter an email to register your account.";
+                StateHasChanged();
                 return;
             }
 
             if (Password != ConfirmPassword)
             {
                 Message = "Passwords do not match.";
+                StateHasChanged();
+                return;
             }
 
             IJson data = new UserRegisterDto
@@ -58,15 +62,18 @@ namespace blazorSBIFS.Client.Pages
 
                 case 422:
                     Message = await response.Content.ReadAsStringAsync();
+                    StateHasChanged();
                     Console.WriteLine(Message);
                     break;
 
                 case 500:
                     Message = "Server Error. Check logs at: {log_path}";
+                    StateHasChanged();
                     break;
 
                 default:
                     Message = ((int)response.StatusCode).ToString() + ": " + await response.Content.ReadAsStringAsync();
+                    StateHasChanged();
                     break;
             }
         }
