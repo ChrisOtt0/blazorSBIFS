@@ -133,19 +133,47 @@ namespace blazorSBIFS.Client.Pages
 			StateHasChanged();
 		}
 
-		public void Save()
+		public async void Save()
 		{
-			FeedbackLabel = "Save was called";
-			StateHasChanged();
-
-			if (ActivityID == 0)
+			if (ActivityID == 0 || Activity == null)
 			{
 				FeedbackLabel = "No Activity to save.";
 				StateHasChanged();
 				return;
 			}
 
-			// Do saving shit
+			string url = "UpdateActivity";
+
+			// Update name
+			Activity.Description = ActivityDescription;
+
+			// Update amount
+			Activity.Amount = Amount;
+
+			// Update Participants
+			if (Activity.Participants == null) Activity.Participants = new List<User>();
+			else Activity.Participants.Clear();
+			foreach (ResponsibleParticipant responsible in ResponsibleParticipants)
+			{
+				if (responsible.IsResponsible)
+					Activity.Participants.Add(responsible.User);
+			}
+
+			// Store persistently
+			HttpResponseMessage response = await _http.Put(baseUrl + url, Activity);
+			if (!response.IsSuccessStatusCode)
+			{
+				FeedbackLabel = ((int)response.StatusCode).ToString()
+					+ ": " + await response.Content.ReadAsStringAsync();
+				StateHasChanged();
+				return;
+			}
+
+			ClearMessages();
+			if (Activity.Group != null)
+				_nav.NavigateTo($"/group/{Activity.Group.GroupID}");
+			else
+				_nav.NavigateTo("/groups");
 		}
 
 		public void Cancel()

@@ -14,7 +14,7 @@
 		<div class="column">
 			<h5>Description</h5>
 
-			<textarea class="description-textarea">
+			<textarea class="description-textarea" @bind-value="ActivityDescription" @bind-value:event="onchange">
 				@ActivityDescription
 			</textarea>
 
@@ -34,7 +34,7 @@
 					<div class="row-list">
 						<form action="" class="flexbox list-item-container" onsubmit="return false;">
 							<p class="p-flex">@user.Name</p>
-							<input type="checkbox" class="input-checkbox" checked="@(user.IsResponsible)"/>
+							<input type="checkbox" class="input-checkbox" checked="@(user.IsResponsible)" @bind-value="@user.IsResponsible"/>
 						</form>
 					</div>
 				}

@@ -239,7 +239,14 @@ namespace blazorSBIFS.Client.Pages
 
         public void Calculate()
         {
-            ActivityMessage = "Calculate was called";
+            if (GroupID == 0)
+            {
+                ActivityMessage = "Cannot calculate bill splitting with no group.";
+                StateHasChanged();
+                return;
+            }
+
+            _nav.NavigateTo($"/output/{GroupID}");
         }
 
         public async void LeaveGroup()

@@ -1,0 +1,11 @@
+﻿@page "/output"
+@page "/output/{GroupID:int}"
+@inject IHttpService _http
+
+<PageTitle>Output</PageTitle>
+
+<div class="content-div">
+	<h1>Group output:</h1>
+	<br/>
+	@((MarkupString)Calculation)
+</div>
