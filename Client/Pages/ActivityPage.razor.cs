@@ -18,7 +18,7 @@ namespace blazorSBIFS.Client.Pages
 		public Activity? Activity { get; set; }
 		public List<User>? GroupParticipants { get; set; } = new List<User>();
 		public List<ResponsibleParticipant> ResponsibleParticipants { get; set; } = new List<ResponsibleParticipant>();
-		public string AmountString { get; set; } = string.Empty;
+		public double Amount { get; set; }
 		public string FeedbackLabel { get; set; } = string.Empty;
 		public bool IsOwner { get; set; } = false;
 
@@ -59,7 +59,7 @@ namespace blazorSBIFS.Client.Pages
 				StateHasChanged();
 				return;
 			}
-			AmountString = Activity.Amount.ToString();
+			Amount = Activity.Amount == null ? 0.0 : Activity.Amount.Value;
 
 			// Check if IsOwner
 			url = "IsOwner";
@@ -137,6 +137,15 @@ namespace blazorSBIFS.Client.Pages
 		{
 			FeedbackLabel = "Save was called";
 			StateHasChanged();
+
+			if (ActivityID == 0)
+			{
+				FeedbackLabel = "No Activity to save.";
+				StateHasChanged();
+				return;
+			}
+
+			// Do saving shit
 		}
 
 		public void Cancel()

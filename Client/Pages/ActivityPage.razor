@@ -21,7 +21,7 @@
 			<div class="row">
 				<form action="" class="flexbox" onsubmit="return false;">
 					<p class="input-label">Amount: </p>
-					<input type="text" @bind-value="AmountString" class="form-control form-input-flex input-amount"/>
+					<input type="number" @bind-value="Amount" min="0" step="0.01" class="form-control form-input-flex input-amount"/>
 				</form>
 			</div>
 		</div>
