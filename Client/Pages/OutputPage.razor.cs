@@ -47,5 +47,13 @@ namespace blazorSBIFS.Client.Pages
 			Calculation = result.Html;
 			StateHasChanged();
 		}
+
+		public void GoBack()
+		{
+			if (GroupID != 0)
+				_nav.NavigateTo($"/group/{GroupID}");
+			else
+				_nav.NavigateTo("/groups");
+		}
 	}
 }

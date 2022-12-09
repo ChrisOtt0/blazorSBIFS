@@ -1,6 +1,7 @@
 ﻿@page "/output"
 @page "/output/{GroupID:int}"
 @inject IHttpService _http
+@inject NavigationManager _nav
 
 <PageTitle>Output</PageTitle>
 
@@ -8,4 +9,8 @@
 	<h1>Group output:</h1>
 	<br/>
 	@((MarkupString)Calculation)
+
+	<div class="row">
+		<button class="btn btn-primary btn-flex" @onclick="(() => GoBack())">Go Back</button>
+	</div>
 </div>
