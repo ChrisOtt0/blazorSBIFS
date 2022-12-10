@@ -19,8 +19,9 @@ namespace blazorSBIFS.Client.Pages
 
             // catching errors
             if (!response.IsSuccessStatusCode) return;
+            if (!((int)response.StatusCode == 200)) return;
 
-            List<Group> groups = await response.Content.ReadFromJsonAsync<List<Group>>();
+            List<Group>? groups = await response.Content.ReadFromJsonAsync<List<Group>>();
             if (groups == null) return;
 
             Groups = groups;

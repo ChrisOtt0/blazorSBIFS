@@ -5,20 +5,24 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register Page</h1>
-<br />
-<div class="col-12">
-	<input type="text" @bind-value="Name" class="form-control" placeholder="Name.." />
-	<br />
-	<input type="text" @bind-value="Email" class="form-control" placeholder="Email.." />
-	<br />
-	<input type="password" @bind-value="Password" class="form-control" placeholder="Password.." />
-	<br />
-	<input type="password" @bind-value="ConfirmPassword" class="form-control" placeholder="Confirm password.." />
-	<br />
-	<button class="btn btn-primary" @onclick="Submit">Submit</button>
-	<span>&nbsp;&nbsp;</span>
-	<a href="/login">Login</a>
-	<span>&nbsp;&nbsp;</span>@Message
+<div class="col-12 main-div">
+	<div class="center col-6">
+		<img class="main-logo" src="images/sbifs.png"/>
+		<h1>Register</h1>
+		<br />
+		<input type="text" @bind-value="Name" class="form-control centered-input" placeholder="Name.." />
+		<br />
+		<input type="text" @bind-value="Email" class="form-control centered-input" placeholder="Email.." />
+		<br />
+		<input type="password" @bind-value="Password" class="form-control centered-input" placeholder="Password.." />
+		<br />
+		<input type="password" @bind-value="ConfirmPassword" class="form-control centered-input" placeholder="Confirm password.." />
+		<br />
+		<button class="btn btn-primary" @onclick="Submit">Submit</button>
+		Already have an account? <a class="form-link" href="/login">Login</a>
+		<br/>
+		<br/>
+		<p class="feedback-label">@Message</p>
+	</div>
 </div>
 

@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using blazorSBIFS.Server.Tools;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ using System.Data;
 
 namespace blazorSBIFS.Server.Controllers
 {
-    [Route("api/[controller]")]
+    [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
     [ApiController]
     public class GroupController : ControllerBase
     {
@@ -39,9 +40,19 @@ namespace blazorSBIFS.Server.Controllers
         public async Task<ActionResult<List<Group>>> ReadMany()
         {
             int userID = _userService.GetUserID();
-            List<Group> groups = await _context.Groups
-                .Where(g => g.OwnerID == userID)
+            User? user = await _context.Users
+                .Where(u => u.UserID == userID)
+                .FirstOrDefaultAsync();
+            if (user == null)
+                return BadRequest("No such user.");
+
+            List<Group> allGroups = await _context.Groups
+                .Include(g => g.Participants)
                 .ToListAsync();
+            if (allGroups == null || allGroups.Count == 0)
+                return NoContent();
+
+            List<Group> groups = allGroups.Where(g => g.Participants.Contains(user)).ToList();
             return Ok(groups);
         }
 
@@ -275,7 +286,7 @@ namespace blazorSBIFS.Server.Controllers
         }
 
         [HttpPost("Calculate"), Authorize(Roles = "admin, user")]
-        public async Task<ActionResult<CalculationDto>> Calculate(GroupDto request)
+        public async Task<ActionResult<CalculationDto>> Calculate(GroupCalculateDto request)
         {
             Group? group = await _context.Groups
                 .Where(g => g.GroupID == request.GroupID)
@@ -313,7 +324,20 @@ namespace blazorSBIFS.Server.Controllers
             // Simplify Graph
             GraphTools.SimplifyGraph(ref graph);
 
-            return Ok(new CalculationDto { Results = await ResultsFromGraph(graph, userReference) });
+            switch (request.OutputForm)
+            {
+                case OutputForm.str:
+                    return Ok(new CalculationDto { Str = await ResultsFromGraph(graph, userReference) });
+
+                case OutputForm.html:
+                    return Ok(new CalculationDto { Html = await ResultsFromGraphHTML(graph, userReference) });
+
+                case OutputForm.pdf:
+                    return Ok(new CalculationDto { Pdf = null });
+
+                default:
+                    return Ok(new CalculationDto());
+            }
         }
 
         private async Task<string> ResultsFromGraph(double[,] graph, Dictionary<User, int> reference)
@@ -385,5 +409,79 @@ namespace blazorSBIFS.Server.Controllers
 
             return results;
         }
+
+        private async Task<string> ResultsFromGraphHTML(double[,] graph, Dictionary<User, int> reference)
+        {
+            string results = "";
+            Dictionary<int, User> revReference = new Dictionary<int, User>();
+            foreach (KeyValuePair<User, int> kvp in reference)
+                revReference.Add(kvp.Value, kvp.Key);
+
+            // go through each reference
+            // User with name and email owes User with name and email & User with name and email receives from User with name and email:
+            // Owes bool to keep track if owes or not, reset upon new reference
+            foreach (KeyValuePair<User, int> kvp in reference)
+            {
+                bool owes = false;
+                bool isOwed = false;
+
+                results += "<h3>User: " + kvp.Key.Name
+                    + "\t - " + _context.UserLogins.
+                        Where(u => u.UserID == kvp.Key.UserID)
+                        .FirstAsync().Result.Email
+                    + "</h3>";
+
+                // Add what the user owes
+                results += "<h5>Owes:</h5><p>";
+                for (int i = 0; i < graph.GetLength(0); i++)
+                {
+                    if (graph[i, kvp.Value] == 0.0 || i == kvp.Value) continue;
+                    User receiver = revReference[i];
+                    UserLogin? receiverLogin = await _context.UserLogins.Where(u => u.UserID == receiver.UserID).FirstOrDefaultAsync();
+                    if (receiverLogin == null)
+                        return "Error in db";
+
+                    results += "" + graph[i, kvp.Value]
+                        + ",- to: " + receiver.Name
+                        + " - " + receiverLogin.Email
+                        + "<br/>";
+
+                    if (!owes)
+                        owes = true;
+                }
+
+                if (!owes)
+                    results += "Nothing.";
+
+                results += "</p>";
+
+                // Add what the user is owed
+                results += "<h5>Is owed:</h5><p>";
+                for (int i = 0; i < graph.GetLength(1); i++)
+                {
+                    if (graph[kvp.Value, i] == 0.0 || i == kvp.Value) continue;
+                    User receiver = revReference[i];
+                    UserLogin? receiverLogin = await _context.UserLogins.Where(u => u.UserID == receiver.UserID).FirstOrDefaultAsync();
+                    if (receiverLogin == null)
+                        return "Error in db";
+
+                    results += graph[kvp.Value, i]
+                        + ",- from: " + receiver.Name
+                        + " - " + receiverLogin.Email
+                        + "<br/>";
+
+                    if (!isOwed)
+                        isOwed = true;
+                }
+
+                if (!isOwed)
+                    results += "Nothing.";
+
+                results += "<p><br/>";
+            }
+
+            return results;
+        }
+
     }
 }

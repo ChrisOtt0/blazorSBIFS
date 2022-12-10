@@ -6,32 +6,91 @@
 
 <PageTitle>Group @GroupName</PageTitle>
 
-<h3>Group @GroupName</h3>
+<div class="content-div">
+	<h1>Group: @GroupName</h1>
+	@if (Group == null) {
+		<h3>Group not found</h3>
+	} else {
+		@if (IsOwner) {
+			<div class="row">
+				<form action="" class="flexbox" onsubmit="return false;">
+					<input type="text" @bind-value="GroupName" class="form-control form-input-flex"/>
+					<button class="btn btn-primary" @onclick="@(() => UpdateName())">Update</button>
+				</form>
+			</div>
+		}
+		<div class="row-double">
+			<div class="column">
+				
+				<h5>Participants</h5>
+				
+				<div class="list-div">
+					@foreach (User participant in Group.Participants)
+					{
+						<div class="row-list">
+							<form action="" class="flexbox list-item-container" onsubmit="return false;">
+								<p class="p-flex">@participant.Name</p>
+								@if (IsOwner && participant.UserID != Group.OwnerID)
+								{
+									<button @onclick="@(() => RemoveParticipant(participant))" class="btn btn-danger list-button">X</button>
+								}
+							</form>
+						</div>
+					}
+				</div>
+				
+				@if (IsOwner) {
+					<div class="row">
+						<form action="" class="flexbox" onsubmit="return false;">
+							<input type="text" @bind-value="SearchEmail" class="form-control form-input-flex" placeholder="Email.."/>
+							<button class="btn btn-primary" @onclick="(() => AddParticipant())">Add</button>
+						</form>
+					</div>
+					<p class="feedback-label participant-message">@ParticipantMessage</p>
+				}
+			</div>
 
-@if (Group == null) {
-	<div>
-		<h4>Group not found</h4>
-	</div>
-} else {
-	<!-- Add group content for editing here -->
-	<div class="column-10">
-		<div>
-			<input type="text" @bind-value="Group.Name" class="form-control"/>
-			<br />
-			<button class="btn btn-primary" @onclick="@(() => UpdateName())">Update</button>
+			<div class="column">
+
+				<h5>Activities</h5>
+
+				<div class="list-div">
+					@foreach (Activity activity in Group.Activities) {
+						<div class="row-list">
+							<form action="" class="flexbox list-item-container" onsubmit="return false;">
+								<p class="p-flex">@ShortenedActivityDescription(activity)</p>
+								<p class="p-double">@activity.Amount</p>
+								<button @onclick="@(() => EditActivity(activity))" class="btn btn-primary list-button">Edit</button>
+							</form>
+						</div>
+					}
+				</div>
+
+				<div class="row">
+					<button @onclick="@(() => AddActivity())" class="btn btn-primary btn-flex">Add Activity</button>
+					<p class="feedback-label activity-message">@ActivityMessage</p>
+				</div>
+			</div>
 		</div>
-		<br />
-		<h5 style="font-weight: bold">Participants</h5>
-		<div class="col-8">
-			@foreach (User user in Group.Participants)
-			{
-				<p>
-					@user.Name
-					<button @onclick="@(() => RemoveParticipant(user))" class="btn btn-danger" style="float: right">Remove</button>
-				</p>
-			}
-		</div>
-		<br />
-	</div>
-}
+
+	}
+</div>
+<br/>
+<div class="row-bottom">
+	<button class="btn btn-primary btn-flex" @onclick="(() => GoBack())">Go Back</button>
+	<span>&nbsp;&nbsp;</span>
+	@if (GroupID != 0) {
+		<button class="btn btn-primary btn-flex" @onclick="(() => Calculate())">Calculate</button>
+	}
+	<span>&nbsp;&nbsp;</span>
+	@if (!IsOwner)
+	{
+		<button class="btn btn-danger btn-flex" @onclick="(() => LeaveGroup())">Leave Group</button>
+	}
+	else
+	{
+		<button class="btn btn-danger btn-flex" @onclick="(() => DeleteGroup())">Delete</button>
+	}
+</div>
+
 

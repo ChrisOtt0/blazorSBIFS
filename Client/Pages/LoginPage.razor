@@ -5,15 +5,19 @@
 
 <PageTitle>Login</PageTitle>
 
-<h1>Login</h1>
-<br />
-<div class="col-12">
-	<input type="text" @bind-value="Email" class="form-control" placeholder="Email.." />
-	<br />
-	<input type="password" @bind-value="Password" class="form-control" placeholder="Password.." />
-	<br />
-	<button class="btn btn-primary" @onclick="Login">Login</button>
-	<span>&nbsp;&nbsp;</span>
-	<a href="/register">Register</a>
-	<span>&nbsp;&nbsp;</span>@Message
+<div class="col-12 main-div">
+	<div class="center col-6">
+		<img class="main-logo" src="images/sbifs.png"/>
+		<h1>Login</h1>
+		<br />
+		<input type="text" @bind-value="Email" class="form-control centered-input" placeholder="Email.." />
+		<br />
+		<input type="password" @bind-value="Password" class="form-control centered-input" placeholder="Password.." />
+		<br />
+		<button class="btn btn-primary" @onclick="Login">Login</button>
+		Don't have an account yet? <a class="form-link" href="/register">Register</a>
+		<br />
+		<br />
+		<p class="feedback-label">@Message</p>
+	</div>
 </div>

@@ -13,10 +13,13 @@ namespace blazorSBIFS.Client.Pages
 
         [Parameter]
         public int GroupID { get; set; }
-        public string GroupName { get; set; } = "not found.";
+        public string GroupName { get; set; } = "Loading..";
         public Group? Group { get; set; }
-        public string Email { get; set; }
-        
+        public string SearchEmail { get; set; } = string.Empty;
+        public bool IsOwner { get; set; } = false;
+        public string ActivityMessage { get; set; } = string.Empty;
+        public string ParticipantMessage { get; set; } = string.Empty;
+
         protected override async void OnInitialized()
         {
             base.OnInitialized();
@@ -33,6 +36,7 @@ namespace blazorSBIFS.Client.Pages
             if (!response.IsSuccessStatusCode)
             {
                 GroupID = 0;
+                StateHasChanged();
                 return;
             }
 
@@ -40,228 +44,278 @@ namespace blazorSBIFS.Client.Pages
             if (g == null)
             {
                 GroupID = 0;
+                StateHasChanged();
                 return;
             }
 
             Group = g;
             GroupName = g.Name;
+
+            // Check if Owner
+            url = "IsOwner";
+            data = new GroupDto { GroupID = this.GroupID };
+
+            response = await _http.Post(baseUrl + url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ActivityMessage = "Error defining owner.";
+                GroupID = 0;
+                StateHasChanged();
+                return;
+            }
+
+            IsOwner = await response.Content.ReadFromJsonAsync<bool>();
             StateHasChanged();
         }
 
-        public void UpdateName()
+        public async void UpdateName()
         {
-            GroupName = Group.Name;
+            if (GroupName == string.Empty)
+            {
+                ActivityMessage = "Group name cannot be empty.";
+                StateHasChanged();
+                return;
+            }
+
+            string url = "UpdateName";
+            IJson data = new GroupNameDto
+            {
+                GroupID = this.GroupID,
+                Name = GroupName
+            };
+
+            HttpResponseMessage response = await _http.Put(baseUrl + url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ActivityMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
+                return;
+            }
+
+            Group? group = await response.Content.ReadFromJsonAsync<Group>();
+            if (group == null)
+            {
+                ActivityMessage = "Something went wrong.";
+                StateHasChanged();
+                return;
+            }
+
+            ActivityMessage = "Name updated successfully.";
+            ParticipantMessage = string.Empty;
+            Group = group;
             StateHasChanged();
         }
 
-        public void RemoveParticipant(User user)
+        public async void AddParticipant()
         {
-            Group.Participants.Remove(user);
-            StateHasChanged();
-        }
-        public void AddParticipant(User user)
-        {
-            Group.Participants.Add(user);
-            StateHasChanged();
-        }
-        public void UpdateGroup()
-        {
-            string url = "UpdateGroup";
-            IJson data = new Group
+            if (GroupID == 0)
             {
-                GroupID = GroupID,
-                Name = Group.Name,
-                Participants = Group.Participants
-            };
-            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
+                ParticipantMessage = "No group to add participants to.";
+                StateHasChanged();
                 return;
             }
-            UpdateName();
-        }
-        public void ReadGroupData()
-        {
-            string url = "ReadOne";
-            IJson data = new GroupDto()
-            {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            Group? g = response.Content.ReadFromJsonAsync<Group>().Result;
-            if (g == null)
-            {
-                GroupID = 0;
-                return;
-            }
-            Group = g;
-            UpdateName();
-        }
-        public void OwnerDeletesGroup()
-        {
-            string url = "Delete";
-            IJson data = new GroupDto()
-            {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Delete(baseUrl + url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            _nav.NavigateTo("groups");
-        }
 
-        public void OwnerRemovesUser(User user)
-        {
-            RemoveParticipant(user);
-            string url = "RemoveParticipant";
-            IJson data = new GroupUserDto()
-            {
-                GroupRequest = new GroupDto()
-                {
-                    GroupID = GroupID
-                },
-                UserRequest = new UserDto()
-                {
-                    UserID = user.UserID
-                }
-            };
-            HttpResponseMessage response = _http.Post(baseUrl + url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                string error = response.Content.ReadAsStringAsync().Result;
-                Console.WriteLine(error);
-                return;
-            }
-            StateHasChanged();
-        }
-
-        public void OwnerAddsUsers(User user) //
-        {
-            AddParticipant(user);
             string url = "AddParticipant";
-            IJson data = new GroupEmailDto()
+            GroupDto gDto = new GroupDto { GroupID = this.GroupID };
+            EmailDto eDto = new EmailDto { Email = SearchEmail };
+            IJson data = new GroupEmailDto
             {
-                GroupRequest = new GroupDto()
-                {
-                    GroupID = GroupID
-                },
-                EmailRequest = new EmailDto()
-                {
-                    Email = Email
-                    
-                }
+                GroupRequest = gDto,
+                EmailRequest = eDto,
             };
-            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
+
+            HttpResponseMessage response = await _http.Put(baseUrl + url, data);
             if (!response.IsSuccessStatusCode)
             {
-                string error = response.Content.ReadAsStringAsync().Result;
-                Console.WriteLine(error);
+                ParticipantMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
                 return;
             }
-            StateHasChanged();
-        }
-        public void UserLeavesGroup() //Method that allows a user to leave the group, if they are not the owner.
-        {
-            string url = "LeaveGroup";
-            IJson data = new GroupDto()
+
+            Group? group = await response.Content.ReadFromJsonAsync<Group>();
+            if (group == null)
             {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Put(baseUrl + url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
+                ParticipantMessage = "Unexpected error.";
                 GroupID = 0;
+                StateHasChanged();
                 return;
             }
-            _nav.NavigateTo("groups");
+
+            Group = group;
+            ClearMessages();
         }
 
-        public void UserDeletesActivity(Activity activity)
+        public async void RemoveParticipant(User user)
         {
+			if (GroupID == 0)
+			{
+				ParticipantMessage = "No group to add participants to.";
+				StateHasChanged();
+				return;
+			}
+
+            string url = "RemoveParticipant";
+            GroupDto gDto = new GroupDto { GroupID = this.GroupID };
+            UserDto uDto = new UserDto { UserID = user.UserID };
+            IJson data = new GroupUserDto
+            {
+                GroupRequest = gDto,
+                UserRequest = uDto,
+            };
+
+            HttpResponseMessage response = await _http.Put(baseUrl + url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ParticipantMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
+                return;
+            }
+
+            Group? group = await response.Content.ReadFromJsonAsync<Group>();
+            if (group == null)
+            {
+                ParticipantMessage = "Unexpected error.";
+                StateHasChanged();
+                return;
+            }
+
+            Group = group;
+            ClearMessages();
+		}
+
+        public async void AddActivity()
+        {
+            if (GroupID == 0)
+            {
+                ActivityMessage = "No group to add activity to.";
+                StateHasChanged();
+                return;
+            }
+
+            string url = "Activity/Create";
+            IJson data = new GroupDto { GroupID = this.GroupID };
+
+            HttpResponseMessage response = await _http.Post(url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ActivityMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
+                return;
+            }
+
+            List<Activity>? activities = await response.Content.ReadFromJsonAsync<List<Activity>>();
+            if (activities == null)
+            {
+                ActivityMessage = "Unexpected error.";
+                StateHasChanged();
+                return;
+            }
+
+            if (Group == null)
+            {
+                ActivityMessage = "Unexpected error.";
+                StateHasChanged();
+                return;
+            }
+
+            Group.Activities = activities;
+            ClearMessages();
+        }
+
+        public void EditActivity(Activity activity)
+        {
+            ClearMessages();
+            _nav.NavigateTo($"/activity/{activity.ActivityID}");
+        }
+
+        public void GoBack()
+        {
+            _nav.NavigateTo("/groups");
+        }
+
+        public void Calculate()
+        {
+            if (GroupID == 0)
+            {
+                ActivityMessage = "Cannot calculate bill splitting with no group.";
+                StateHasChanged();
+                return;
+            }
+
+            _nav.NavigateTo($"/output/{GroupID}");
+        }
+
+        public async void LeaveGroup()
+        {
+            if (GroupID == 0)
+            {
+                ActivityMessage = "No group to leave.";
+                StateHasChanged();
+                return;
+            }
+
+            string url = "LeaveGroup";
+            IJson data = new GroupDto() { GroupID = this.GroupID };
+
+            HttpResponseMessage response = await _http.Put(baseUrl+ url, data);
+            if (!response.IsSuccessStatusCode)
+            {
+                ActivityMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
+                return;
+            }
+
+            ClearMessages();
+            _nav.NavigateTo("/groups");
+        }
+
+        public async void DeleteGroup()
+        {
+            if (GroupID == 0)
+            {
+                ActivityMessage = "No group to delete.";
+                StateHasChanged();
+                return;
+            }
+
             string url = "Delete";
-            IJson data = new ActivityDto()
-            {
-                ActivityID = activity.ActivityID
-            };
-            HttpResponseMessage response = _http.Delete(url, data).Result;
+            IJson data = new GroupDto { GroupID = this.GroupID };
+
+            HttpResponseMessage response = await _http.Delete(baseUrl + url, data);
             if (!response.IsSuccessStatusCode)
             {
-                GroupID = 0;
+                ActivityMessage = ((int)response.StatusCode).ToString()
+                    + ": " + await response.Content.ReadAsStringAsync();
+                StateHasChanged();
                 return;
             }
-            ReadGroupData();
+
+            ClearMessages();
+            _nav.NavigateTo("/groups");
         }
-        public void UserEditsActivity(Activity activity)
+
+        public string ShortenedActivityDescription(Activity activity)
         {
-            string url = "UpdateActivity";
-            IJson data = new Activity()
-            {
-                ActivityID = activity.ActivityID,
-                Group = activity.Group,
-                Amount = activity.Amount,
-                Description = activity.Description,
-            };
-            HttpResponseMessage response = _http.Put(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            ReadGroupData();
+            if (activity.Description == null || activity.Description == string.Empty) return "New Activity";
+
+            if (activity.Description.IndexOf("\n") > -1)
+                return activity.Description.Substring(0, activity.Description.IndexOf("\n"));
+            else if (activity.Description.IndexOf(" ") > -1)
+                return activity.Description.Substring(0, activity.Description.IndexOf(" "));
+            else
+                return activity.Description;
         }
-        public void UserAddsActivity(Activity activity)
+
+        private void ClearMessages()
         {
-            string url = "Create";
-            IJson data = new GroupDto()
-            {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Post(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            ReadGroupData();
-        }
-        public void UserReadsActivity(Activity activity)
-        {
-            string url = "ReadOne";
-            IJson data = new ActivityDto()
-            {
-                ActivityID = activity.ActivityID
-            };
-            HttpResponseMessage response = _http.Post(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            ReadGroupData();
-        }
-        public void OwnerReadsAllActivities()
-        {
-            string url = "ReadMany";
-            IJson data = new GroupDto()
-            {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Post(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            ReadGroupData();
+            ActivityMessage = string.Empty;
+            ParticipantMessage = string.Empty;
+            StateHasChanged();
         }
         public void RemoveUsersActivity(Activity activity)
         {

@@ -1,7 +1,57 @@
 ﻿@page "/activity"
-@page "/activity/{ActivityID:int"
+@page "/activity/{ActivityID:int}"
 @inject IHttpService _http
 @inject ITokenService _token
 @inject NavigationManager _nav
 
-<h3>ActivityPage</h3>
+<PageTitle>Activity @ShortenedActivityDescription</PageTitle>
+
+
+<div class="content-div">
+	<h1>Activity: @ShortenedActivityDescription</h1>
+
+	<div class="row-double">
+		<div class="column">
+			<h5>Description</h5>
+
+			<textarea class="description-textarea" @bind-value="ActivityDescription" @bind-value:event="onchange">
+				@ActivityDescription
+			</textarea>
+
+			<div class="row">
+				<form action="" class="flexbox" onsubmit="return false;">
+					<p class="input-label">Amount: </p>
+					<input type="number" @bind-value="Amount" min="0" step="0.01" class="form-control form-input-flex input-amount"/>
+				</form>
+			</div>
+		</div>
+
+		<div class="column">
+			<h5>Responsible Participants</h5>
+
+			<div class="list-div">
+				@foreach (ResponsibleParticipant user in ResponsibleParticipants) {
+					<div class="row-list">
+						<form action="" class="flexbox list-item-container" onsubmit="return false;">
+							<p class="p-flex">@user.Name</p>
+							<input type="checkbox" class="input-checkbox" checked="@(user.IsResponsible)" @bind-value="@user.IsResponsible"/>
+						</form>
+					</div>
+				}
+			</div>
+
+		</div>
+	</div>
+
+	<div class="row-bottom">
+		<button class="btn btn-primary btn-flex" @onclick="(() => Save())">Save</button>
+		<span>&nbsp;&nbsp;</span>
+		<button class="btn btn-primary btn-flex" @onclick="(() => Cancel())">Cancel</button>
+		
+		@if (IsOwner) {
+			<span>&nbsp;&nbsp;</span>
+			<button class="btn btn-danger btn-flex" @onclick="(() => Delete())">Delete</button>
+		}
+		<p class="feedback-label label-flex">@FeedbackLabel</p>
+	</div>
+</div>
