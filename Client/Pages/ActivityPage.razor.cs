@@ -7,9 +7,10 @@ using System.Text.RegularExpressions;
 
 namespace blazorSBIFS.Client.Pages
 {
-	public partial class ActivityPage
-	{
-		string baseUrl = "Activity/";
+    public partial class ActivityPage
+    {
+        string baseUrl = "Activity/";
+
 
 		[Parameter]
 		public int ActivityID { get; set; }
@@ -22,10 +23,10 @@ namespace blazorSBIFS.Client.Pages
 		public string FeedbackLabel { get; set; } = string.Empty;
 		public bool IsOwner { get; set; } = false;
 
-		protected override async void OnInitialized()
-		{
-			base.OnInitialized();
-			if (_token.Jwt == string.Empty) _nav.NavigateTo("login");
+    protected override async void OnInitialized()
+    {
+        base.OnInitialized();
+        if (_token.Jwt == string.Empty) _nav.NavigateTo("login");
 
 			// Read Activity
 			string url = "ReadOne";
