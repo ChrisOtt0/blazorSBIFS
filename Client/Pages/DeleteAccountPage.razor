@@ -1,0 +1,23 @@
+﻿@page "/deleteAccount"
+@inject IHttpService _http
+@inject ITokenService _token
+@inject NavigationManager _nav
+
+
+<div class="col-12">
+	<div class="content-div">
+		<h1>Are you sure you want to delete your account?</h1>
+		<br/>
+		Please enter your email and password to delete your account.
+		<br />
+		<input type="text" @bind-value="Email" class="form-control form-input" placeholder="Email.." />
+		<br />
+		<input type="password" @bind-value="Password" class="form-control form-input" placeholder="Password.." />
+		<br />
+		<button class="btn btn-danger" @onclick="Submit">Submit</button>
+		<button class="btn btn-secondary" @onclick="@(() => _nav.NavigateTo("/"))">Cancel</button>
+		<br />
+		<p class="feedback-label">@Message</p>
+	</div>
+
+</div>

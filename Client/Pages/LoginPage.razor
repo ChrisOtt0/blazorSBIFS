@@ -1,0 +1,23 @@
+﻿@page "/login"
+@inject IHttpService _http
+@inject ITokenService _token
+@inject NavigationManager _nav
+
+<PageTitle>Login</PageTitle>
+
+<div class="col-12 main-div">
+	<div class="center col-6">
+		<img class="main-logo" src="images/sbifs.png"/>
+		<h1>Login</h1>
+		<br />
+		<input type="text" @bind-value="Email" class="form-control centered-input" placeholder="Email.." />
+		<br />
+		<input type="password" @bind-value="Password" class="form-control centered-input" placeholder="Password.." />
+		<br />
+		<button class="btn btn-primary" @onclick="Login">Login</button>
+		Don't have an account yet? <a class="form-link" href="/register">Register</a>
+		<br />
+		<br />
+		<p class="feedback-label">@Message</p>
+	</div>
+</div>

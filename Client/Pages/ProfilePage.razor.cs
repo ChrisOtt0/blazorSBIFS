@@ -1,72 +1,59 @@
-﻿using blazorSBIFS.Client.Pages;
-using blazorSBIFS.Client.Services;
-using blazorSBIFS.Shared.DataTransferObjects;
-using blazorSBIFS.Shared.Models;
+﻿using blazorSBIFS.Shared.DataTransferObjects;
+using System.Net.Http.Json;
 
-namespace blazorSBIFS.Client.ViewModels
+namespace blazorSBIFS.Client.Pages
 {
-    public interface IProfileViewModel
-    {
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string OldPassword { get; set; }
-        public string NewPassword { get; set; }
-        public string ConfirmNew { get; set; }
-
-        public string ChangesMessage { get; set; }
-        public string PasswordMessage { get; set; }
-
-        public string BaseUrl { get; }
-
-        public Action StateHasChangedDelegate { get; set; }
-
-        public void SaveChanges();
-        public void UpdatePassword();
-    }
-
-    public class ProfileViewModel : IProfileViewModel
-    {
-        private readonly IHttpService _httpService;
+	public partial class ProfilePage
+	{
+        string baseUrl = "User/";
 
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string OldPassword { get; set; } = string.Empty;
         public string NewPassword { get; set; } = string.Empty;
-        public string ConfirmNew { get; set; } = string.Empty; 
+        public string ConfirmNew { get; set; } = string.Empty;
 
         public string ChangesMessage { get; set; } = string.Empty;
         public string PasswordMessage { get; set; } = string.Empty;
 
-        public string BaseUrl { get; } = "User/";
-
-        public Action StateHasChangedDelegate { get; set; }
-
-        public ProfileViewModel(IHttpService httpService)
+        protected override async void OnInitialized()
         {
-            _httpService = httpService;
-        }
+            if (_token.Jwt == string.Empty) _nav.NavigateTo("login");
 
+            string url = "ReadOne";
+            HttpResponseMessage response = await _http.Get(baseUrl + url);
+
+            // Handle errors
+            if (!response.IsSuccessStatusCode) return;
+
+            UserDto? user = await response.Content.ReadFromJsonAsync<UserDto>();
+            if (user == null) return;
+
+            Name = user.Name;
+            Email = user.Email;
+            StateHasChanged();
+        }
         public async void SaveChanges()
         {
             string url = "UpdateUser";
             ChangesMessage = "Saving changes...";
-            StateHasChangedDelegate();
+            StateHasChanged();
 
             IJson data = new UserDto
             {
                 Name = this.Name,
                 Email = this.Email
             };
-            HttpResponseMessage response = await _httpService.Put(BaseUrl + url, data);
+            HttpResponseMessage response = await _http.Put(baseUrl + url, data);
             if (!response.IsSuccessStatusCode)
             {
                 ChangesMessage = await response.Content.ReadAsStringAsync();
-                StateHasChangedDelegate();
+                StateHasChanged();
                 return;
             }
 
             ChangesMessage = "Update successful!";
-            StateHasChangedDelegate();
+            StateHasChanged();
         }
 
         public async void UpdatePassword()
@@ -76,28 +63,28 @@ namespace blazorSBIFS.Client.ViewModels
             if (NewPassword != ConfirmNew)
             {
                 PasswordMessage = "Passwords do not match.";
-                StateHasChangedDelegate();
+                StateHasChanged();
                 return;
             }
 
             PasswordMessage = "Updating password...";
-            StateHasChangedDelegate();
+            StateHasChanged();
 
             IJson data = new PasswordDto
             {
                 OldPassword = this.OldPassword,
                 NewPassword = this.NewPassword,
             };
-            HttpResponseMessage response = await _httpService.Put(BaseUrl + url, data);
+            HttpResponseMessage response = await _http.Put(baseUrl + url, data);
             if (!response.IsSuccessStatusCode)
             {
                 PasswordMessage = await response.Content.ReadAsStringAsync();
-                StateHasChangedDelegate();
+                StateHasChanged();
                 return;
             }
 
             PasswordMessage = "Password updated successfully!";
-            StateHasChangedDelegate();
+            StateHasChanged();
         }
     }
 }

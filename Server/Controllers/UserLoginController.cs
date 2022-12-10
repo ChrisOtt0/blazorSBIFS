@@ -12,20 +12,21 @@ namespace blazorSBIFS.Server.Controllers
     public class UserLoginController : ControllerBase
     {
         private readonly DataContext _context;
-        private readonly IUserService _userService;
 
-        public UserLoginController(DataContext context, IUserService userService)
+        public UserLoginController(DataContext context)
         {
             _context = context;
-            _userService = userService;
         }
 
-        // Change to accomodate change in Models (User <-> UserLogin)
+        /*
+         *  Users must register to use the service. Users are autmatically set up with user privileges.
+         *  Admin rights are given manually, by making a manual change in the database, to prevent users from accidentally gaining admin rights.
+         */
         [AllowAnonymous]
         [HttpPost("Register")]
-        public async Task<ActionResult> Register(UserRegisterDto request)
+        public async Task<ActionResult<TokenDto>> Register(UserRegisterDto request)
         {
-            var user = await _context.UserLogins.FirstOrDefaultAsync(u => u.Email == request.Email);
+            UserLogin? user = await _context.UserLogins.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user != null)
                 return UnprocessableEntity("Email not valid or taken.");
 
@@ -48,31 +49,32 @@ namespace blazorSBIFS.Server.Controllers
             await _context.UserLogins.AddAsync(ul);
             await _context.SaveChangesAsync();
 
-            var jwt = JwtTools.CreateToken(u);
-            return Ok(new { jwt });
+            string jwt = JwtTools.CreateToken(u);
+            return Ok(new TokenDto { Jwt = jwt });
         }
 
-        // Change to accomodate change in Models (User <-> UserLogin)
+        // User must be logged in to use the system. 
         [AllowAnonymous]
         [HttpPost("Login")]
-        public async Task<ActionResult<object>> Login(UserLoginDto request)
+        public async Task<ActionResult<TokenDto>> Login(UserLoginDto request)
         {
-            var login = await _context.UserLogins.FirstOrDefaultAsync(u => u.Email == request.Email);
+            UserLogin? login = await _context.UserLogins.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (login == null)
                 return Unauthorized("Wrong username or password.");
-
+            
             string salt = new SaltAdapter().GetSalt();
             string hashedPass = SecurityTools.HashString(request.Password, salt);
 
             if (login.Password != hashedPass)
                 return Unauthorized("Wrong username or password.");
 
-            var user = await _context.Users.FindAsync(login.UserID);
+            User? user = await _context.Users.FindAsync(login.UserID);
             if (user == null)
                 return BadRequest("No such user. Please contact an administrator.");
 
-            var jwt = JwtTools.CreateToken(user);
-            return Ok(new { jwt });
+            string jwt = JwtTools.CreateToken(user);
+            return Ok(new TokenDto { Jwt = jwt });
+            
         }
     }
 }
