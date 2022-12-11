@@ -317,35 +317,35 @@ namespace blazorSBIFS.Client.Pages
             ParticipantMessage = string.Empty;
             StateHasChanged();
         }
-        public void RemoveUsersActivity(Activity activity)
-        {
-            string url = "Delete";
-            IJson data = new ActivityDto()
-            {
-                ActivityID = activity.ActivityID
-            };
-            HttpResponseMessage response = _http.Post(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            ReadGroupData();
-        }
-        public void AddUsersActivity(Activity activity)
-        {
-            string url = "Create";
-            IJson data = new GroupDto()
-            {
-                GroupID = GroupID
-            };
-            HttpResponseMessage response = _http.Post(url, data).Result;
-            if (!response.IsSuccessStatusCode)
-            {
-                GroupID = 0;
-                return;
-            }
-            ReadGroupData();
-        }
+        //public void RemoveUsersActivity(Activity activity)
+        //{
+        //    string url = "Delete";
+        //    IJson data = new ActivityDto()
+        //    {
+        //        ActivityID = activity.ActivityID
+        //    };
+        //    HttpResponseMessage response = _http.Post(url, data).Result;
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        GroupID = 0;
+        //        return;
+        //    }
+        //    ReadGroupData();
+        //}
+        //public void AddUsersActivity(Activity activity)
+        //{
+        //    string url = "Create";
+        //    IJson data = new GroupDto()
+        //    {
+        //        GroupID = GroupID
+        //    };
+        //    HttpResponseMessage response = _http.Post(url, data).Result;
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        GroupID = 0;
+        //        return;
+        //    }
+        //    ReadGroupData();
+        //}
     }
 }
