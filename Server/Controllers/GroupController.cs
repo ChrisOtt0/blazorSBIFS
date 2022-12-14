@@ -213,6 +213,57 @@ namespace blazorSBIFS.Server.Controllers
 
             return Ok(group);
         }
+
+        [HttpPut("RemoveParticipant"), Authorize(Roles = "admin, user")]
+        public async Task<ActionResult<Group>> RemoveParticipant(GroupUserDto request)
+        {
+            if (request.GroupRequest == null || request.UserRequest == null)
+                return BadRequest("Request incomplete.");
+
+            int userID = _userService.GetUserID();
+            Group? group = await _context.Groups
+                .Where(g => g.GroupID == request.GroupRequest.GroupID)
+                .Include(g => g.Participants)
+                .Include(g => g.Activities)
+                .FirstOrDefaultAsync();
+            if (group == null)
+                return BadRequest("No such group.");
+
+            if (group.OwnerID != userID)
+                return Unauthorized("Only the group owner can remove participants.");
+
+            User? participant = await _context.UserLogins
+                .Where(u => u.UserID == request.UserRequest.UserID)
+                .Select(u => u.User)
+                .FirstOrDefaultAsync();
+            if (participant == null)
+                return BadRequest("No such user");
+
+            if (participant.UserID == group.OwnerID)
+                return Unauthorized("Cannot remove the owner of the group.");
+
+            if (!group.Participants.Contains(participant))
+                return BadRequest("User is not a participant in the selected group.");
+
+
+            List<Activity>? activities = await _context.Activities
+                .Where(a => a.Group == group).ToListAsync();
+            if (activities != null && activities.Any())
+            {
+                foreach (Activity activity in activities)
+                {
+                    var entry = _context.Entry(activity);
+                    if (entry.Entity.Participants.Contains(participant))
+                        entry.Entity.Participants.Remove(participant);
+                }
+            }
+
+            group.Participants.Remove(participant);
+            await _context.SaveChangesAsync();
+
+            return Ok(group);
+        }
+
         [HttpDelete("Delete"), Authorize(Roles = "admin, user")]
         public async Task<ActionResult> Delete(GroupDto request)
         {
